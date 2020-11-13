@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "femto": {
+      "version": "0.8.7",
+      "commands": [
+        "femto"
+      ]
+    },
+    "fable": {
+      "version": "3.0.0-nagareyama-rc-005",
+      "commands": [
+        "fable"
+      ]
+    }
+  }
+}

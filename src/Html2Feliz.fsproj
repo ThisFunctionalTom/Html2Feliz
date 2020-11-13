@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="HtmlParser2.fs" />
+    <Compile Include="Html2Feliz.fs" />
+    <Compile Include="App.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="5.0" />
+    <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
+    <PackageReference Include="Feliz" Version="1.16.0" />
+    <PackageReference Include="Zanaptak.TypedCssClasses" Version="0.2.0" />
+    <!-- <PackageReference Include="FSharp.Data" Version="3.3.3" /> -->
+  </ItemGroup>
+
+</Project>
