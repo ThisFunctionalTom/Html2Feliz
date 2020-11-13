@@ -18,7 +18,6 @@
     <PackageReference Include="Feliz" Version="1.16.0" />
     <PackageReference Include="Feliz.Bulma" Version="2.4.0" />
     <PackageReference Include="Zanaptak.TypedCssClasses" Version="0.2.0" />
-    <!-- <PackageReference Include="FSharp.Data" Version="3.3.3" /> -->
   </ItemGroup>
 
 </Project>

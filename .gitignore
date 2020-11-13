@@ -9,4 +9,4 @@ node_modules/
 obj/
 bin/
 
-dist/
+deploy/

@@ -1,25 +1,28 @@
 {
     "private": true,
     "scripts": {
-        "start": "dotnet fable watch src --run parcel ./src/index.html --open --port 8080",
-        "build": "dotnet fable src --run parcel build ./src/index.html",
-        "start:parcel": "parcel ./src/index.html",
-        "build:parcel": "parcel build ./src/index.html",
+        "start": "dotnet fable watch src --run webpack-dev-server",
+        "build": "dotnet fable src --run webpack",
         "predeploy": "npm run build",
-        "deploy": "gh-pages -d dist -o github"
+        "deploy": "gh-pages -d deploy -o github"
     },
     "dependencies": {
-        "assemble": "^0.3.83",
         "bulma": "^0.9.1",
-        "grunt": "^0.4.5",
         "htmlparser2": "^5.0.1",
         "react": "^16.14.0",
-        "react-dom": "^16.14.0",
-        "styles": "^0.2.1"
+        "react-dom": "^16.14.0"
     },
     "devDependencies": {
+        "copy-webpack-plugin": "^5.1.2",
+        "css-loader": "^5.0.1",
         "gh-pages": "^3.1.0",
-        "parcel": "2.0.0-nightly.432",
-        "sass": "^1.27.0"
+        "html-webpack-plugin": "^4.5.0",
+        "mini-css-extract-plugin": "^1.3.1",
+        "sass": "^1.27.0",
+        "sass-loader": "^10.1.0",
+        "style-loader": "^2.0.0",
+        "webpack": "^4.41.6",
+        "webpack-cli": "^3.3.11",
+        "webpack-dev-server": "^3.10.3"
     }
 }
