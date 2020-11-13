@@ -22,55 +22,50 @@ type Model = {
 
 type Msg =
 | InputChanged of string
-| Convert
-
 
 let example = """
 <div class="container">
-  <div class="notification is-primary">
-    This container is <strong>centered</strong> on desktop and larger viewports.
-  </div>
+    <div class="notification is-primary">
+        This container is <strong>centered</strong> on desktop and larger viewports.
+    </div>
 </div>
 """
 
-let exampl2 = """
+let example2 = """
 <nav class="level">
-  <div class="level-left">
-    <div class="level-item">
-      <p class="subtitle is-5"><strong>123</strong> posts</p>
+    <div class="level-left">
+        <div class="level-item">
+            <p class="subtitle is-5"><strong>123</strong> posts</p>
+        </div>
+        <div class="level-item">
+            <div class="field has-addons">
+                <p class="control">
+                    <input class="input" type="text" placeholder="Find a post" />
+                </p>
+                <p class="control">
+                    <button class="button">Search</button>
+                </p>
+            </div>
+        </div>
     </div>
-    <div class="level-item">
-      <div class="field has-addons">
-        <p class="control">
-          <input class="input" type="text" placeholder="Find a post" />
-        </p>
-        <p class="control">
-          <button class="button">Search</button>
-        </p>
-      </div>
+    <div class="level-right">
+        <p class="level-item"><strong>All</strong></p>
+        <p class="level-item"><a>Published</a></p>
+        <p class="level-item"><a>Drafts</a></p>
+        <p class="level-item"><a>Deleted</a></p>
+        <p class="level-item"><a class="button is-success">New</a></p>
     </div>
-  </div>
-  <div class="level-right">
-    <p class="level-item"><strong>All</strong></p>
-    <p class="level-item"><a>Published</a></p>
-    <p class="level-item"><a>Drafts</a></p>
-    <p class="level-item"><a>Deleted</a></p>
-    <p class="level-item"><a class="button is-success">New</a></p>
-  </div>
 </nav>
 """
 
-let parse = SimpleXml.parseElement
-
 let init() : Model =
   { Input = example
-    Output = parse example }
+    Output = Html2Feliz.parse example }
 
 // UPDATE
 let update (msg:Msg) (model:Model) =
     match msg with
-    | InputChanged content -> { model with Input = content; Output = parse model.Input }
-    | Convert -> { model with Output = parse model.Input }
+    | InputChanged content -> { model with Input = content; Output = Html2Feliz.parse content }
 
 module Extensions =
     open Browser.Dom
@@ -99,33 +94,19 @@ let view (model:Model) dispatch =
                         prop.valueOrDefault model.Input
                         prop.onChange (InputChanged >> dispatch)
                     ] |> Html.div
-                    Html.button [
-                        prop.text "Convert"
-                        prop.onClick (fun _ -> dispatch Convert)
-                    ]
                 ]
                 Bulma.column [
+                    Html.button [
+                        prop.text "Copy"
+                        prop.onClick (fun _ -> Extensions.copyToClipboard "output")
+                    ]
                     Bulma.box [
                         prop.id "output"
                         prop.rows 25
                         prop.cols 80
                         prop.children (Html2Feliz.formatNode 4 0 model.Output |> String.concat "\n" |> Html.pre)
                     ] |> Html.div
-                    Html.button [
-                        prop.text "Copy"
-                        prop.onClick (fun _ -> Extensions.copyToClipboard "output")
-                    ]
                 ]
-            ]
-            Bulma.box [
-                prop.id "output2"
-                prop.rows 25
-                prop.cols 80
-                prop.children (sprintf "%A" model.Output |> Html.pre)
-            ] |> Html.div
-            Html.button [
-                prop.text "Copy"
-                prop.onClick (fun _ -> Extensions.copyToClipboard "output")
             ]
         ]
     ]

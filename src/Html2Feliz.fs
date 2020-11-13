@@ -5,7 +5,7 @@ open System.Collections.Generic
 open Fable.SimpleXml
 
 let rec sanitizeContent (content: string) =
-    let sanitized = content.Replace("\n", " ").Replace("  ", " ")
+    let sanitized = content.Replace("\n", " ").Replace("\r", " ").Replace("  ", " ")
     if content <> sanitized
     then sanitizeContent sanitized
     else content
@@ -51,6 +51,7 @@ let rec formatNode indent level (node: XmlElement) =
 
     seq {
         match node with
+        | Text text when (String.IsNullOrWhiteSpace text) -> () // ignore empty text elements
         | Text text -> line level (sprintf @"Html.text ""%s""" text)
         | SingleTextChild (node, text) -> line level (sprintf "Html.%s \"%s\"" node text)
         | Attributes (name, attrs) ->
@@ -76,3 +77,5 @@ let rec formatNode indent level (node: XmlElement) =
                           yield! formatNode indent (level + 2) child
                       line (level + 1) "]" ]
     }
+
+let parse = SimpleXml.parseElement

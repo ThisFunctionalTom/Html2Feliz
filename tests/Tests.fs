@@ -5,16 +5,16 @@ open Fable.Mocha
 
 type String with
     member str.ShowWs =
-        str
-            .Replace(' ', '␠')
-            .Replace('\r', '␍')
-            .Replace('\n', '␤')
+        str.Replace(' ', '.')
+            // .Replace(' ', '␠')
+            // .Replace('\r', '␍')
+            // .Replace('\n', '␤')
 
 let testConversion (name: string, htmlStr: string, expected: string) =
     testCase name <| fun _ ->
         let actual =
             Html2Feliz.parse htmlStr
-            |> Html2Feliz.formatDocument 4
+            |> Html2Feliz.formatNode 4 0
             |> String.concat "\n"
         let expected' = expected.Replace("\r", "")
         Expect.equal actual.ShowWs expected'.ShowWs "should be equal"
@@ -28,8 +28,8 @@ let tests =
         "div with attributes",
             @"<div id=""some-id"" class=""first""></div>",
             """Html.div [
-    prop.id "some-id"
     prop.className "first"
+    prop.id "some-id"
 ]"""
 
         "div with text",
@@ -39,11 +39,18 @@ let tests =
   </div>
 </div>""",
             """Html.div [
-    prop.classes [ "notification"; "is-primary" ]
+    prop.className "container"
+    prop.id "value"
+    prop.style "color: red"
     prop.children [
-        Html.text "This container is"
-        Html.strong "centered"
-        Html.text " on desktop and larger viewports."
+        Html.div [
+            prop.className [ "notification"; "is-primary" ]
+            prop.children [
+                Html.text " This container is "
+                Html.strong "centered"
+                Html.text " on desktop and larger viewports. "
+            ]
+        ]
     ]
 ]"""
     ]
