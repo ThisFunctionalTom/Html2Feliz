@@ -48,7 +48,7 @@ let formatAttribute indent level (attr: HtmlAttribute) =
 
             sprintf "%sprop.className [ %s ]" indentStr classNames
     else
-        sprintf "%sprop.%s \"%s\"" indentStr attr.Name attr.Value
+        sprintf @"%sprop.%s ""%s""" indentStr attr.Name (attr.Value.Trim())
 
 let rec formatNode indent level (node: HtmlNode) =
     let indentStr = String(' ', indent * level)
@@ -63,7 +63,7 @@ let rec formatNode indent level (node: HtmlNode) =
 
     seq {
         match node with
-        | Text text -> line level (sprintf "Html.text \"%s\"" text)
+        | Text text -> line level (sprintf @"Html.text ""%s""" text)
         | SingleTextChild (node, text) -> line level (sprintf "Html.%s \"%s\"" node text)
         | Attributes (name, attrs) ->
             yield!

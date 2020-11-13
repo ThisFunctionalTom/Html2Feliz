@@ -3,8 +3,10 @@
     "scripts": {
         "start": "webpack-dev-server",
         "build": "webpack",
-        "pretest": "fable-splitter tests -o dist/tests --commonjs",
-        "test": "mocha dist/tests",
+        "test:live": "webpack-dev-server --config ./webpack.tests.js",
+        "pretest": "fable-splitter --config splitter.tests.js",
+        "build:test": "webpack --config webpack.tests.js",
+        "test": "mocha ./tests-js",
         "deploy": "gh-pages -d deploy -o github"
     },
     "dependencies": {
@@ -21,7 +23,7 @@
         "@babel/preset-react": "^7.12.5",
         "@babel/runtime": "^7.12.5",
         "babel-loader": "^8.2.1",
-        "copy-webpack-plugin": "^5.1.2",
+        "copy-webpack-plugin": "^6.3.1",
         "core-js": "^3.7.0",
         "css-loader": "^5.0.1",
         "fable-compiler": "^2.13.0",

@@ -5,22 +5,21 @@
 // See below if you need better fine-tuning of Webpack options
 
 // Dependencies. Also required: core-js, fable-loader, fable-compiler, @babel/core,
-// @babel/preset-env, babel-loader, sass, sass-loader, css-loader, style-loader, file-loader
+// @babel/preset-env, babel-loader
 var path = require("path");
 var webpack = require("webpack");
-var HtmlPlugin = require('html-webpack-plugin');
-var CopyPlugin = require('copy-webpack-plugin');
-var CssPlugin = require("mini-css-extract-plugin");
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+var MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 var CONFIG = {
     // The tags to include the generated JS and CSS will be automatically injected in the HTML template
     // See https://github.com/jantimon/html-webpack-plugin
-    indexHtmlTemplate: "./src/index.html",
-    fsharpEntry: "./src/Html2Feliz.fsproj",
-    cssEntry: "./src/styles/main.scss",
-    outputDir: "./deploy",
+    indexHtmlTemplate: "./tests/index.html",
+    fsharpEntry: "./tests/Tests.fsproj",
+    outputDir: "./dist",
     assetsDir: "./public",
-    devServerPort: 8080,
+    devServerPort: 8085,
     // When using webpack-dev-server, you may need to redirect some calls
     // to a external API server. See https://webpack.js.org/configuration/dev-server/#devserver-proxy
     devServerProxy: undefined,
@@ -28,6 +27,8 @@ var CONFIG = {
     // More info at https://babeljs.io/docs/en/next/babel-preset-env.html
     babel: {
         presets: [
+            // In case interop is used with React/Jsx components, this React preset would be required
+            ["@babel/preset-react"],
             ["@babel/preset-env", {
                 "targets": "> 0.25%, not dead",
                 "modules": false,
@@ -47,7 +48,7 @@ console.log("Bundling for " + (isProduction ? "production" : "development") + ".
 // The HtmlWebpackPlugin allows us to use a template for the index.html page
 // and automatically injects <script> or <link> tags for generated bundles.
 var commonPlugins = [
-    new HtmlPlugin({
+    new HtmlWebpackPlugin({
         filename: 'index.html',
         template: resolve(CONFIG.indexHtmlTemplate)
     })
@@ -56,12 +57,9 @@ var commonPlugins = [
 module.exports = {
     // In development, bundle styles together with the code so they can also
     // trigger hot reloads. In production, put them in a separate CSS file.
-    entry: isProduction ? {
-        app: [resolve(CONFIG.fsharpEntry), resolve(CONFIG.cssEntry)]
-    } : {
-            app: [resolve(CONFIG.fsharpEntry)],
-            style: [resolve(CONFIG.cssEntry)]
-        },
+    entry: {
+        app: [resolve(CONFIG.fsharpEntry)]
+    },
     // Add a hash to the output file name in production
     // to prevent browser caching if code changes
     output: {
@@ -83,24 +81,23 @@ module.exports = {
             }
         },
     },
-    // Besides the HtmlPlugin, we use the following plugins:
-    // PRODUCTION
-    //      - MiniCssExtractPlugin: Extracts CSS from bundle to a different file
-    //          To minify CSS, see https://github.com/webpack-contrib/mini-css-extract-plugin#minimizing-for-production
-    //      - CopyWebpackPlugin: Copies static assets to output directory
-    // DEVELOPMENT
-    //      - HotModuleReplacementPlugin: Enables hot reloading when code changes without refreshing
-    plugins: isProduction ?
-        commonPlugins.concat([
-            new CssPlugin({ filename: 'style.css' }),
-            new CopyPlugin({ patterns: [{ from: resolve(CONFIG.assetsDir) }] }),
-        ])
-        : commonPlugins.concat([
-            new webpack.HotModuleReplacementPlugin(),
-        ]),
+    plugins: commonPlugins.concat([
+        new CopyWebpackPlugin({
+            patterns: [
+                { from: resolve(CONFIG.assetsDir) }
+            ]
+        }),
+    ]),
+
     resolve: {
         // See https://github.com/fable-compiler/Fable/issues/1490
-        symlinks: false
+        symlinks: false,
+        modules: [resolve("./node_modules")],
+        alias: {
+            // Some old libraries still use an old specific version of core-js
+            // Redirect the imports of these libraries to the newer core-js
+            'core-js/es6': 'core-js/es'
+        }
     },
     // Configuration for webpack-dev-server
     devServer: {
@@ -132,18 +129,18 @@ module.exports = {
                 use: {
                     loader: 'babel-loader',
                     options: CONFIG.babel
-                },
+                }
             },
             {
                 test: /\.(sass|scss|css)$/,
                 use: [
                     isProduction
-                        ? CssPlugin.loader
+                        ? MiniCssExtractPlugin.loader
                         : 'style-loader',
                     'css-loader',
                     {
-                      loader: 'sass-loader',
-                      options: { implementation: require("sass") }
+                        loader: 'sass-loader',
+                        options: { implementation: require("sass") }
                     }
                 ],
             },
