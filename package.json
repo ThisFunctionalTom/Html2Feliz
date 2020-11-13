@@ -6,7 +6,7 @@
         "start:parcel": "parcel ./src/index.html",
         "build:parcel": "parcel build ./src/index.html",
         "predeploy": "npm run build",
-        "deploy": "gh-pages -d deploy"
+        "deploy": "gh-pages -d dist -o github"
     },
     "dependencies": {
         "assemble": "^0.3.83",
