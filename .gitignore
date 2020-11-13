@@ -1,7 +1,12 @@
-dist/
-node_modules/
 .ionide/
-obj/
-bin/
 .fake
 .parcel-cache/
+.cache/
+
+node_modules/
+
+*.fs.js
+obj/
+bin/
+
+dist/

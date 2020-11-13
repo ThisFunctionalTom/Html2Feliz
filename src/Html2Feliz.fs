@@ -45,7 +45,7 @@ let formatAttribute indent level (attr: HtmlAttribute) =
         | multi ->
             let classNames =
                 multi
-                |> Array.map (sprintf "%A")
+                |> Array.map (sprintf "\"%s\"")
                 |> String.concat "; "
             sprintf $"{indentStr}prop.className [ {classNames} ]"
     else
@@ -90,17 +90,29 @@ let formatDocument indent (html: HtmlDocument) =
             yield! formatNode indent 0 node
     }
 
+open Fable.Core
 open Fable.Core.JsInterop
+open Fable.Core.DynamicExtensions
+
+[<Emit("Object.entries($0)")>]
+let objectEntries (jsObj: obj) : (string*string) array = jsNative 
 
 let parse (htmlString: string) : HtmlDocument =
     let handler = createEmpty<Htmlparser2.Handler>
     let mutable nodes = List.empty
     let mutable current = List.empty
 
-    handler.onopentag <- fun (name : string) (attributes : obj) -> 
+    handler.onopentag <- fun (name : string) (attributes: obj) -> 
+        printfn $"Attributes: {attributes}"
+        let attrs = 
+            objectEntries attributes
+            |> List.ofArray
+            |> List.map (fun (name, value) -> { Name = name; Value = value })
+
+        printfn $"Attrs: {attrs}"
         current <- {
             Name = name
-            Attributes = List.empty
+            Attributes = attrs
             Elements = List.empty
             DirectInnerText = None
         } :: current

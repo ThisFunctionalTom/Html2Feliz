@@ -7,12 +7,15 @@
         "build:parcel": "parcel build ./src/index.html",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d deploy"
-
     },
     "dependencies": {
+        "assemble": "^0.3.83",
+        "bulma": "^0.9.1",
+        "grunt": "^0.4.5",
         "htmlparser2": "^5.0.1",
         "react": "^16.14.0",
-        "react-dom": "^16.14.0"
+        "react-dom": "^16.14.0",
+        "styles": "^0.2.1"
     },
     "devDependencies": {
         "gh-pages": "^3.1.0",
