@@ -18,21 +18,22 @@ Fable.Core.JsInterop.importSideEffects "./styles/main.scss"
 type Model = {
   Input: string
   Output: XmlElement
+  DropdownIsActive: bool
 }
 
 type Msg =
 | InputChanged of string
+| SelectExample of string
+| ToggleDropdown
 
-let example = """
-<div class="container">
+let examples = [
+    "Bulma container", """<div class="container">
     <div class="notification is-primary">
         This container is <strong>centered</strong> on desktop and larger viewports.
     </div>
-</div>
-"""
+</div>"""
 
-let example2 = """
-<nav class="level">
+    "Bulma navbar", """<nav class="level">
     <div class="level-left">
         <div class="level-item">
             <p class="subtitle is-5"><strong>123</strong> posts</p>
@@ -55,17 +56,26 @@ let example2 = """
         <p class="level-item"><a>Deleted</a></p>
         <p class="level-item"><a class="button is-success">New</a></p>
     </div>
-</nav>
-"""
+</nav>"""
+]
 
 let init() : Model =
-  { Input = example
-    Output = Html2Feliz.parse example }
+    let input = snd (List.head examples)
+    { Input = input
+      Output = Html2Feliz.parse input
+      DropdownIsActive = false }
 
 // UPDATE
 let update (msg:Msg) (model:Model) =
     match msg with
     | InputChanged content -> { model with Input = content; Output = Html2Feliz.parse content }
+    | SelectExample name ->
+        let content = examples |> List.pick (fun (n, c) -> if n = name then Some c else None)
+        { model with
+            Input = content;
+            Output = Html2Feliz.parse content
+            DropdownIsActive = false }
+    | ToggleDropdown -> { model with DropdownIsActive = not model.DropdownIsActive }
 
 module Extensions =
     open Browser.Dom
@@ -81,6 +91,41 @@ module Extensions =
         with
         _ -> ()
 
+let examplesDropdown active dispatch =
+    Bulma.dropdown [
+        if active then dropdown.isActive
+        prop.children [
+            Bulma.dropdownTrigger [
+                Bulma.button.button [
+                    prop.ariaControls "dropdown-menu"
+                    prop.text "Examples"
+                    prop.onClick (fun _ -> dispatch ToggleDropdown)
+                ]
+                Html.span [
+                    prop.className [ "icon"; "is-small" ]
+                    prop.children [
+                        Html.i [
+                            prop.ariaHidden true
+                            prop.className [ "fas"; "fa-angle-down" ]
+                        ]
+                    ]
+                ]
+            ]
+            Bulma.dropdownMenu [
+                prop.id "dropdown-menu"
+                prop.children [
+                    Bulma.dropdownContent [
+                        for name, _ in examples do
+                            Bulma.dropdownItem.a [
+                                prop.text name
+                                prop.onClick (fun _ -> dispatch (SelectExample name))
+                            ]
+                    ]
+                ]
+            ]
+        ]
+    ]
+
 let view (model:Model) dispatch =
     Bulma.container [
         container.isFluid
@@ -88,6 +133,7 @@ let view (model:Model) dispatch =
             Bulma.title.h1 "Html2Feliz"
             Bulma.columns [
                 Bulma.column [
+                    examplesDropdown model.DropdownIsActive dispatch
                     Bulma.textarea [
                         prop.rows 25
                         prop.cols 80
@@ -96,7 +142,8 @@ let view (model:Model) dispatch =
                     ] |> Html.div
                 ]
                 Bulma.column [
-                    Html.button [
+                    Bulma.button.button [
+                        color.isPrimary
                         prop.text "Copy"
                         prop.onClick (fun _ -> Extensions.copyToClipboard "output")
                     ]
