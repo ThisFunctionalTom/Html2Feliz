@@ -7,12 +7,6 @@
       "commands": [
         "femto"
       ]
-    },
-    "fable": {
-      "version": "3.0.0-nagareyama-rc-005",
-      "commands": [
-        "fable"
-      ]
     }
   }
 }

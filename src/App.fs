@@ -60,7 +60,7 @@ let exampl2 = """
 </nav>
 """
 
-let init() : Model = 
+let init() : Model =
   { Input = example
     Output = parse example }
 
@@ -73,7 +73,7 @@ let update (msg:Msg) (model:Model) =
 module Extensions =
     open Browser.Dom
     let copyToClipboard nodeId =
-        let node = document.querySelector $"#{nodeId}"
+        let node = document.querySelector (sprintf "#%s" nodeId)
         let range = document.createRange()
         range.selectNode node
         window.getSelection().addRange(range)
@@ -103,7 +103,7 @@ let view (model:Model) dispatch =
                     ]
                 ]
                 Bulma.column [
-                    Bulma.box [ 
+                    Bulma.box [
                         prop.id "output"
                         prop.rows 25
                         prop.cols 80
@@ -117,7 +117,7 @@ let view (model:Model) dispatch =
             ]
         ]
     ]
-  
+
 // App
 Program.mkSimple init update view
 |> Program.withReactSynchronous "feliz-app"

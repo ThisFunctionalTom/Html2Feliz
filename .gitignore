@@ -10,3 +10,4 @@ obj/
 bin/
 
 deploy/
+dist/

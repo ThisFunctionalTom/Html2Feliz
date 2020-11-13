@@ -26,10 +26,10 @@ let (|Text|SingleTextChild|Attributes|Children|Complex|) (node: HtmlNode) =
     let name = node.Name
 
     if hasSingleTextChild then
-        SingleTextChild(name, node.DirectInnerText)
+        SingleTextChild(name, node.DirectInnerText |> Option.defaultValue "")
     else
         match hasChildren, hasAttrs with
-        | false, false -> Text(node.DirectInnerText)
+        | false, false -> Text(node.DirectInnerText |> Option.defaultValue "")
         | false, true -> Attributes(name, attrs)
         | true, false -> Children(name, children)
         | true, true -> Complex(name, attrs, children)
@@ -39,31 +39,32 @@ let formatAttribute indent level (attr: HtmlAttribute) =
     if attr.Name = "class" then
         let classes = attr.Value.Split(' ')
         match classes with
-        | [| single |] -> $"{indentStr}prop.className \"{single}\""
+        | [| single |] -> sprintf "%sprop.className \"%s\"" indentStr single
         | multi ->
             let classNames =
                 multi
                 |> Array.map (sprintf "\"%s\"")
                 |> String.concat "; "
 
-            sprintf $"{indentStr}prop.className [ {classNames} ]"
+            sprintf "%sprop.className [ %s ]" indentStr classNames
     else
-        $"{indentStr}prop.{attr.Name} \"{attr.Value}\""
+        sprintf "%sprop.%s \"%s\"" indentStr attr.Name attr.Value
 
 let rec formatNode indent level (node: HtmlNode) =
-    let line level text = $"{String(' ', indent * level)}{text}"
+    let indentStr = String(' ', indent * level)
+    let line level text = sprintf "%s%s" indentStr text
 
     let nodeBlock name content =
         seq {
-            line level $"Html.{name} ["
+            line level (sprintf "Html.%s [" name)
             yield! content
             line level "]"
         }
 
     seq {
         match node with
-        | Text text -> line level $"Html.text \"{text}\""
-        | SingleTextChild (node, text) -> line level $"Html.{node} \"{text}\""
+        | Text text -> line level (sprintf "Html.text \"%s\"" text)
+        | SingleTextChild (node, text) -> line level (sprintf "Html.%s \"%s\"" node text)
         | Attributes (name, attrs) ->
             yield!
                 nodeBlock
