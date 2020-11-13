@@ -21,15 +21,30 @@ let testConversion (name: string, htmlStr: string, expected: string) =
 
 let tests =
     [
-        "can convert simple span",
+        "simple span",
             "<span>Hello, World!</span>",
             @"Html.span ""Hello, World!"""
 
-        "can convert element with attributes",
+        "div with attributes",
             @"<div id=""some-id"" class=""first""></div>",
             """Html.div [
     prop.id "some-id"
     prop.className "first"
+]"""
+
+        "div with text",
+            """<div class="container" id="value" style="color: red">
+  <div class="notification is-primary">
+    This container is <strong>centered</strong> on desktop and larger viewports.
+  </div>
+</div>""",
+            """Html.div [
+    prop.classes [ "notification"; "is-primary" ]
+    prop.children [
+        Html.text "This container is"
+        Html.strong "centered"
+        Html.text " on desktop and larger viewports."
+    ]
 ]"""
     ]
     |> List.map testConversion

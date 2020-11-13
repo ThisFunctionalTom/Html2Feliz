@@ -9,7 +9,7 @@ open Elmish
 open Elmish.React
 open Feliz
 open Feliz.Bulma
-open Html2Feliz
+open Fable.SimpleXml
 
 Fable.Core.JsInterop.importSideEffects "./styles/main.scss"
 
@@ -17,7 +17,7 @@ Fable.Core.JsInterop.importSideEffects "./styles/main.scss"
 
 type Model = {
   Input: string
-  Output: HtmlDocument
+  Output: XmlElement
 }
 
 type Msg =
@@ -60,6 +60,8 @@ let exampl2 = """
 </nav>
 """
 
+let parse = SimpleXml.parseElement
+
 let init() : Model =
   { Input = example
     Output = parse example }
@@ -67,7 +69,7 @@ let init() : Model =
 // UPDATE
 let update (msg:Msg) (model:Model) =
     match msg with
-    | InputChanged content -> { model with Input = content }
+    | InputChanged content -> { model with Input = content; Output = parse model.Input }
     | Convert -> { model with Output = parse model.Input }
 
 module Extensions =
@@ -107,13 +109,23 @@ let view (model:Model) dispatch =
                         prop.id "output"
                         prop.rows 25
                         prop.cols 80
-                        prop.children (formatDocument 4 model.Output |> String.concat "\n" |> Html.pre)
+                        prop.children (Html2Feliz.formatNode 4 0 model.Output |> String.concat "\n" |> Html.pre)
                     ] |> Html.div
                     Html.button [
                         prop.text "Copy"
                         prop.onClick (fun _ -> Extensions.copyToClipboard "output")
                     ]
                 ]
+            ]
+            Bulma.box [
+                prop.id "output2"
+                prop.rows 25
+                prop.cols 80
+                prop.children (sprintf "%A" model.Output |> Html.pre)
+            ] |> Html.div
+            Html.button [
+                prop.text "Copy"
+                prop.onClick (fun _ -> Extensions.copyToClipboard "output")
             ]
         ]
     ]

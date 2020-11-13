@@ -1,42 +1,29 @@
 module Html2Feliz
 
 open System
+open System.Collections.Generic
+open Fable.SimpleXml
 
-type HtmlAttribute = { Name: string; Value: string }
+let rec sanitizeContent (content: string) =
+    let sanitized = content.Replace("\n", " ").Replace("  ", " ")
+    if content <> sanitized
+    then sanitizeContent sanitized
+    else content
 
-type HtmlNode =
-    { Name: string
-      Attributes: HtmlAttribute list
-      Elements: HtmlNode list
-      DirectInnerText: string option }
+let (|Text|SingleTextChild|Attributes|Children|Complex|) (node: XmlElement) =
+    let hasAttrs = not node.Attributes.IsEmpty
+    match hasAttrs, node.Children with
+    | false, [] ->
+        if node.IsTextNode
+        then Text(sanitizeContent node.Content)
+        else SingleTextChild(node.Name, sanitizeContent node.Content)
+    | false, children -> Children(node.Name, children)
+    | true, [] -> Attributes(node.Name, node.Attributes)
+    | true, children -> Complex(node.Name, node.Attributes, children)
 
-type HtmlDocument = { Elements: HtmlNode list }
-
-let (|Text|SingleTextChild|Attributes|Children|Complex|) (node: HtmlNode) =
-    let attrs = node.Attributes
-    let hasAttrs = not attrs.IsEmpty
-    let children = node.Elements
-    let hasChildren = not children.IsEmpty
-
-    let hasSingleTextChild =
-        not hasAttrs
-        && not hasChildren
-        && Option.isSome node.DirectInnerText
-
-    let name = node.Name
-
-    if hasSingleTextChild then
-        SingleTextChild(name, node.DirectInnerText |> Option.defaultValue "")
-    else
-        match hasChildren, hasAttrs with
-        | false, false -> Text(node.DirectInnerText |> Option.defaultValue "")
-        | false, true -> Attributes(name, attrs)
-        | true, false -> Children(name, children)
-        | true, true -> Complex(name, attrs, children)
-
-let formatAttribute indent level (attr: HtmlAttribute) =
+let formatAttribute indent level (attr: KeyValuePair<string, string>) =
     let indentStr = String(' ', indent * level)
-    if attr.Name = "class" then
+    if attr.Key = "class" then
         let classes = attr.Value.Split(' ')
         match classes with
         | [| single |] -> sprintf "%sprop.className \"%s\"" indentStr single
@@ -48,11 +35,12 @@ let formatAttribute indent level (attr: HtmlAttribute) =
 
             sprintf "%sprop.className [ %s ]" indentStr classNames
     else
-        sprintf @"%sprop.%s ""%s""" indentStr attr.Name (attr.Value.Trim())
+        sprintf @"%sprop.%s ""%s""" indentStr attr.Key (attr.Value)
 
-let rec formatNode indent level (node: HtmlNode) =
-    let indentStr = String(' ', indent * level)
-    let line level text = sprintf "%s%s" indentStr text
+let rec formatNode indent level (node: XmlElement) =
+    let line level text =
+        let indentStr = String(' ', indent * level)
+        sprintf "%s%s" indentStr text
 
     let nodeBlock name content =
         seq {
@@ -88,60 +76,3 @@ let rec formatNode indent level (node: HtmlNode) =
                           yield! formatNode indent (level + 2) child
                       line (level + 1) "]" ]
     }
-
-let formatDocument indent (html: HtmlDocument) =
-    seq {
-        for node in html.Elements do
-            yield! formatNode indent 0 node
-    }
-
-open Fable.Core
-open Fable.Core.JsInterop
-
-[<Emit("Object.entries($0)")>]
-let objectEntries (jsObj: obj): (string * string) array = jsNative
-
-let parse (htmlString: string): HtmlDocument =
-    let handler = createEmpty<Htmlparser2.Handler>
-    let mutable nodes = List.empty
-    let mutable current = List.empty
-
-    handler.onopentag <-
-        fun (name: string) (attributes: obj) ->
-            let attrs =
-                objectEntries attributes
-                |> List.ofArray
-                |> List.map (fun (name, value) -> { Name = name; Value = value })
-
-            current <-
-                { Name = name
-                  Attributes = attrs
-                  Elements = List.empty
-                  DirectInnerText = None }
-                :: current
-
-    handler.ontext <-
-        fun text ->
-            match current with
-            | node :: parents ->
-                current <-
-                    { node with
-                          DirectInnerText = Some text }
-                    :: parents
-            | _ -> ()
-
-    handler.onclosetag <-
-        fun (name: string) ->
-            match current with
-            | node :: parent :: parents ->
-                current <-
-                    { parent with
-                          Elements = parent.Elements @ [ node ] }
-                    :: parents
-            | _ -> ()
-
-    let parser =
-        Htmlparser2.exports.Parser.Create(handler)
-
-    parser.write (htmlString)
-    { Elements = current }
