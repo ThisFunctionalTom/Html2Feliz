@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Include="FormatingTests.fs" />
+    <Compile Include="BulmaExampleParserTests.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
 

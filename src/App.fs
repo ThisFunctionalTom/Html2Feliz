@@ -13,6 +13,7 @@ open Fable.SimpleXml
 open FSharp.Data.LiteralProviders
 open Fable.Core.JsInterop
 open Zanaptak.TypedCssClasses
+open Fable.SimpleHttp
 
 type FA = CssClasses<"../node_modules/@fortawesome/fontawesome-free/css/all.min.css", Naming.PascalCase>
 
@@ -20,7 +21,16 @@ importSideEffects "./styles/main.scss"
 
 // MODEL
 
+let examples = [|
+    "Bulma container", TextFile<"examples/Bulma container.html">.Text
+    "Bulma navbar", TextFile<"examples/Bulma navbar.html">.Text
+    "Bulma menu", TextFile<"examples/Bulma menu.html">.Text
+    "Bulma message", TextFile<"examples/Bulma message.html">.Text
+    "Bulma modal", TextFile<"examples/Bulma modal.html">.Text
+|]
+
 type Model = {
+  Examples: (string*string) array
   Input: string
   Output: XmlElement
   DropdownIsActive: bool
@@ -29,33 +39,40 @@ type Model = {
 type Msg =
 | InputChanged of string
 | SelectExample of string
+| BulmaExampleLoaded of int*string
 | ToggleDropdown
 
-let examples = [
-    "Bulma container", TextFile<"examples/Bulma container.html">.Text
-    "Bulma navbar", TextFile<"examples/Bulma navbar.html">.Text
-    "Bulma menu", TextFile<"examples/Bulma menu.html">.Text
-    "Bulma message", TextFile<"examples/Bulma message.html">.Text
-    "Bulma modal", TextFile<"examples/Bulma modal.html">.Text
-]
+module BulmaExamples =
+    let docs = "https://raw.githubusercontent.com/jgthms/bulma/master/docs/documentation/"
 
-let init() : Model =
-    let input = snd (List.head examples)
-    { Input = input
+    let getExamples docPage =
+        Cmd.OfAsync.perform Http.get (sprintf "%s/%s.html" docs docPage)
+
+    let getBreadcrumbExamples =
+        getExamples "components/breadcrumb"
+
+let init () : Model*Cmd<Msg> =
+    let cmd = BulmaExamples.getBreadcrumbExamples BulmaExampleLoaded
+    let input = snd (Array.head examples)
+    { Examples = examples
+      Input = input
       Output = Html2Feliz.parse input
-      DropdownIsActive = false }
+      DropdownIsActive = false }, cmd
 
 // UPDATE
 let update (msg:Msg) (model:Model) =
     match msg with
-    | InputChanged content -> { model with Input = content; Output = Html2Feliz.parse content }
+    | InputChanged content -> { model with Input = content; Output = Html2Feliz.parse content }, Cmd.none
     | SelectExample name ->
-        let content = examples |> List.pick (fun (n, c) -> if n = name then Some c else None)
+        let content = model.Examples |> Array.pick (fun (n, c) -> if n = name then Some c else None)
         { model with
             Input = content;
             Output = Html2Feliz.parse content
-            DropdownIsActive = false }
-    | ToggleDropdown -> { model with DropdownIsActive = not model.DropdownIsActive }
+            DropdownIsActive = false }, Cmd.none
+    | ToggleDropdown -> { model with DropdownIsActive = not model.DropdownIsActive }, Cmd.none
+    | BulmaExampleLoaded (statusCode, content) ->
+        printfn "StatusCode: %d" statusCode
+        { model with Examples = BulmaExampleParser.getExamples content }, Cmd.none
 
 module Extensions =
     open Browser.Dom
@@ -81,9 +98,9 @@ let icon faIcon =
         ]
     ]
 
-let examplesDropdown active dispatch =
+let examplesDropdown (model: Model) dispatch =
     Bulma.dropdown [
-        if active then dropdown.isActive
+        if model.DropdownIsActive then dropdown.isActive
         prop.children [
             Bulma.dropdownTrigger [
                 Bulma.button.button [
@@ -99,7 +116,7 @@ let examplesDropdown active dispatch =
                 prop.id "dropdown-menu"
                 prop.children [
                     Bulma.dropdownContent [
-                        for name, _ in examples do
+                        for name, _ in model.Examples do
                             Bulma.dropdownItem.a [
                                 prop.text name
                                 prop.onClick (fun _ -> dispatch (SelectExample name))
@@ -117,7 +134,7 @@ let view (model:Model) dispatch =
             Bulma.title.h1 "Html2Feliz"
             Bulma.columns [
                 Bulma.column [
-                    examplesDropdown model.DropdownIsActive dispatch
+                    examplesDropdown model dispatch
                     Bulma.textarea [
                         prop.rows 25
                         prop.cols 80
@@ -143,7 +160,7 @@ let view (model:Model) dispatch =
     ]
 
 // App
-Program.mkSimple init update view
+Program.mkProgram init update view
 |> Program.withReactSynchronous "feliz-app"
 |> Program.withConsoleTrace
 |> Program.run
