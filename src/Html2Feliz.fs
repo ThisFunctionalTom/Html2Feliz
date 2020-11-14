@@ -90,6 +90,11 @@ let rec formatNode indent level (node: XmlElement) =
                       line (level + 1) "]" ]
     }
 
-let format (node: XmlElement) = formatNode 4 0 node
+let format (nodes: XmlElement list) =
+    [ for node in nodes do
+        yield! formatNode 4 0 node ]
+    |> String.concat "\n"
 
-let parse = SimpleXml.parseElement
+let parse = SimpleXml.parseManyElements
+
+let tryParse = SimpleXml.tryParseManyElements

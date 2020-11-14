@@ -15,8 +15,7 @@ let testConversion (name: string, htmlStr: string, expected: string) =
     testCase name <| fun _ ->
         let actual =
             Html2Feliz.parse htmlStr
-            |> Html2Feliz.formatNode 4 0
-            |> String.concat "\n"
+            |> Html2Feliz.format
         let expected' = expected.Replace("\r", "")
         Expect.equal actual.ShowWs expected'.ShowWs "should be equal"
 

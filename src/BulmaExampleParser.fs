@@ -7,7 +7,7 @@ let getExamples (examplesHtml: string) =
     let lines = examplesHtml.Split('\n', '\r')
     let startIdx =
         lines
-        |> findAllIndexes (fun line -> line.StartsWith("{% capture") && line.EndsWith("_example %}"))
+        |> findAllIndexes (fun line -> line.StartsWith("{% capture"))
     let endIdx =
         lines
         |> findAllIndexes (fun line -> line = "{% endcapture %}")
