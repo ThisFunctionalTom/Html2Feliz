@@ -10,6 +10,7 @@ open Elmish.React
 open Feliz
 open Feliz.Bulma
 open Fable.SimpleXml
+open FSharp.Data.LiteralProviders
 
 Fable.Core.JsInterop.importSideEffects "./styles/main.scss"
 
@@ -27,36 +28,8 @@ type Msg =
 | ToggleDropdown
 
 let examples = [
-    "Bulma container", """<div class="container">
-    <div class="notification is-primary">
-        This container is <strong>centered</strong> on desktop and larger viewports.
-    </div>
-</div>"""
-
-    "Bulma navbar", """<nav class="level">
-    <div class="level-left">
-        <div class="level-item">
-            <p class="subtitle is-5"><strong>123</strong> posts</p>
-        </div>
-        <div class="level-item">
-            <div class="field has-addons">
-                <p class="control">
-                    <input class="input" type="text" placeholder="Find a post" />
-                </p>
-                <p class="control">
-                    <button class="button">Search</button>
-                </p>
-            </div>
-        </div>
-    </div>
-    <div class="level-right">
-        <p class="level-item"><strong>All</strong></p>
-        <p class="level-item"><a>Published</a></p>
-        <p class="level-item"><a>Drafts</a></p>
-        <p class="level-item"><a>Deleted</a></p>
-        <p class="level-item"><a class="button is-success">New</a></p>
-    </div>
-</nav>"""
+    "Bulma container", TextFile<"examples/Bulma container.html">.Text
+    "Bulma navbar", TextFile<"examples/Bulma navbar.html">.Text
 ]
 
 let init() : Model =

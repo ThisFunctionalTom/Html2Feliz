@@ -10,6 +10,18 @@ let rec sanitizeContent (content: string) =
     then sanitizeContent sanitized
     else content
 
+let capitalize ( s : string ) =
+    s.[ 0 ].ToString().ToUpperInvariant() + s.[ 1 .. ].ToLowerInvariant()
+
+let toCamelCase (words: string []) =
+    words
+    |> Array.mapi (fun i s -> if i > 0 then capitalize s else s.ToLowerInvariant())
+
+let sanitizeAttributeName (attr: string) =
+    attr.Split('-')
+    |> toCamelCase
+    |> String.concat ""
+
 let (|Text|SingleTextChild|Attributes|Children|Complex|) (node: XmlElement) =
     let hasAttrs = not node.Attributes.IsEmpty
     match hasAttrs, node.Children with
@@ -28,14 +40,14 @@ let formatAttribute indent level (attr: KeyValuePair<string, string>) =
         match classes with
         | [| single |] -> sprintf "%sprop.className \"%s\"" indentStr single
         | multi ->
-            let classNames =
+            let classes =
                 multi
                 |> Array.map (sprintf "\"%s\"")
                 |> String.concat "; "
 
-            sprintf "%sprop.className [ %s ]" indentStr classNames
+            sprintf "%sprop.classes [ %s ]" indentStr classes
     else
-        sprintf @"%sprop.%s ""%s""" indentStr attr.Key (attr.Value)
+        sprintf @"%sprop.%s ""%s""" indentStr (sanitizeAttributeName attr.Key) (attr.Value)
 
 let rec formatNode indent level (node: XmlElement) =
     let line level text =
@@ -77,5 +89,7 @@ let rec formatNode indent level (node: XmlElement) =
                           yield! formatNode indent (level + 2) child
                       line (level + 1) "]" ]
     }
+
+let format (node: XmlElement) = formatNode 4 0 node
 
 let parse = SimpleXml.parseElement

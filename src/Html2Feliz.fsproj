@@ -19,6 +19,7 @@
     <PackageReference Include="Fable.SimpleXml" Version="3.2.0" />
     <PackageReference Include="Feliz" Version="1.16.0" />
     <PackageReference Include="Feliz.Bulma" Version="2.4.0" />
+    <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.3.5" />
     <PackageReference Include="Zanaptak.TypedCssClasses" Version="0.4.0" />
   </ItemGroup>
 
