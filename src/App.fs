@@ -165,13 +165,19 @@ let examplesMenu model dispatch =
         prop.children [
             for kv in model.Examples do
                 let page = kv.Key
+                let isExpanded = model.ExpandedExamples.Contains page
                 Html.p [
                     prop.className "menu-label"
-                    prop.text page
                     prop.style [ style.cursor.pointer ]
                     prop.onClick (fun _ -> dispatch (ToggleExampleExpanded page))
+                    prop.children [
+                        Html.span page
+                        if isExpanded
+                        then icon FA.FaAngleRight
+                        else icon FA.FaAngleDown
+                    ]
                 ]
-                if model.ExpandedExamples.Contains page then
+                if isExpanded then
                     Html.ul [
                         prop.className "menu-list"
                         prop.children [
