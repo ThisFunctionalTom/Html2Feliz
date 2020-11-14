@@ -22,16 +22,13 @@ let sanitizeAttributeName (attr: string) =
     |> toCamelCase
     |> String.concat ""
 
-let (|Text|SingleTextChild|Attributes|Children|Complex|) (node: XmlElement) =
-    let hasAttrs = not node.Attributes.IsEmpty
-    match hasAttrs, node.Children with
-    | false, [] ->
-        if node.IsTextNode
-        then Text(sanitizeContent node.Content)
-        else SingleTextChild(node.Name, sanitizeContent node.Content)
-    | false, children -> Children(node.Name, children)
-    | true, [] -> Attributes(node.Name, node.Attributes)
-    | true, children -> Complex(node.Name, node.Attributes, children)
+let (|CommentNode|TextNode|SelfClosingElement|EmptyElement|EmptyElementWithText|MixedNode|) (node: XmlElement) =
+    if node.IsComment then CommentNode node.Content
+    elif node.IsTextNode then TextNode node.Content
+    elif node.SelfClosing then SelfClosingElement (node.Name, node.Attributes)
+    elif List.isEmpty node.Children && node.Content = "" then EmptyElement (node.Name, node.Attributes)
+    elif List.isEmpty node.Children && node.Content <> "" then EmptyElementWithText (node.Name, node.Attributes, node.Content)
+    else MixedNode (node.Name, node.Attributes, node.Children)
 
 let formatAttribute indent level (attr: KeyValuePair<string, string>) =
     let indentStr = String(' ', indent * level)
@@ -63,31 +60,35 @@ let rec formatNode indent level (node: XmlElement) =
 
     seq {
         match node with
-        | Text text when (String.IsNullOrWhiteSpace text) -> () // ignore empty text elements
-        | Text text -> line level (sprintf @"Html.text ""%s""" text)
-        | SingleTextChild (node, text) -> line level (sprintf "Html.%s \"%s\"" node text)
-        | Attributes (name, attrs) ->
-            yield!
-                nodeBlock
-                    name
-                    [ for attr in attrs do
-                        formatAttribute indent (level + 1) attr ]
-        | Children (name, children) ->
-            yield!
-                nodeBlock
-                    name
-                    [ for child in children do
-                        yield! formatNode indent (level + 1) child ]
-        | Complex (name, attrs, children) ->
-            yield!
-                nodeBlock
-                    name
-                    [ for attr in attrs do
-                        formatAttribute indent (level + 1) attr
-                      line (level + 1) "prop.children ["
-                      for child in children do
-                          yield! formatNode indent (level + 2) child
-                      line (level + 1) "]" ]
+        | CommentNode _ -> ()
+        | TextNode text -> line level (sprintf "Html.text \"%s\"" text)
+        | SelfClosingElement (name, attrs)
+        | EmptyElement (name, attrs) ->
+            if Map.isEmpty attrs
+            then line level (sprintf "Html.%s []" name)
+            else
+                line level (sprintf "Html.%s [" name)
+                for attr in attrs do
+                    formatAttribute indent (level + 1) attr
+                line level "]"
+        | EmptyElementWithText (name, attrs, text) ->
+            if Map.isEmpty attrs
+            then line level (sprintf "Html.%s \"%s\"" name text)
+            else
+                line level (sprintf "Html.%s [" name)
+                for attr in attrs do
+                    formatAttribute indent (level + 1) attr
+                line (level+1) (sprintf "prop.text \"%s\"" text)
+                line level "]"
+        | MixedNode (name, attrs, children) ->
+            line level (sprintf "Html.%s [" name)
+            for attr in attrs do
+                formatAttribute indent (level + 1) attr
+            line (level+1) "prop.children ["
+            for child in children do
+                yield! formatNode indent (level+2) child
+            line (level+1) "]"
+            line level "]"
     }
 
 let format (nodes: XmlElement list) =

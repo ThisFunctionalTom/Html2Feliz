@@ -6,9 +6,9 @@ Html.div [
         Html.div [
             prop.classes [ "notification"; "is-primary" ]
             prop.children [
-                Html.text " This container is "
+                Html.text "This container is "
                 Html.strong "centered"
-                Html.text " on desktop and larger viewports. "
+                Html.text " on desktop and larger viewports."
             ]
         ]
     ]
