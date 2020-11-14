@@ -25,6 +25,10 @@ let examples = [|
     "simple header", TextFile<"examples/SimpleHeader.html">.Text
     "simple body", TextFile<"examples/SimpleBody.html">.Text
     "paragraph with class", TextFile<"examples/ParagraphWithStyle.html">.Text
+    "comments are ignored", TextFile<"examples/CommentNode.html">.Text
+    "self closing element", TextFile<"examples/SelfClosingElement.html">.Text
+    "empty element", TextFile<"examples/EmptyElement.html">.Text
+    "empty element with text", TextFile<"examples/EmptyElementWithText.html">.Text
 |]
 
 type Model = {
