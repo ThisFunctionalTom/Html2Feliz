@@ -36,6 +36,7 @@ let examples = [
     "Bulma navbar", TextFile<"examples/Bulma navbar.html">.Text
     "Bulma menu", TextFile<"examples/Bulma menu.html">.Text
     "Bulma message", TextFile<"examples/Bulma message.html">.Text
+    "Bulma modal", TextFile<"examples/Bulma modal.html">.Text
 ]
 
 let init() : Model =
