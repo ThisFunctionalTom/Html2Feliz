@@ -11,8 +11,12 @@ open Feliz
 open Feliz.Bulma
 open Fable.SimpleXml
 open FSharp.Data.LiteralProviders
+open Fable.Core.JsInterop
+open Zanaptak.TypedCssClasses
 
-Fable.Core.JsInterop.importSideEffects "./styles/main.scss"
+type FA = CssClasses<"../node_modules/@fortawesome/fontawesome-free/css/all.min.css", Naming.PascalCase>
+
+importSideEffects "./styles/main.scss"
 
 // MODEL
 
@@ -30,6 +34,8 @@ type Msg =
 let examples = [
     "Bulma container", TextFile<"examples/Bulma container.html">.Text
     "Bulma navbar", TextFile<"examples/Bulma navbar.html">.Text
+    "Bulma menu", TextFile<"examples/Bulma menu.html">.Text
+    "Bulma message", TextFile<"examples/Bulma message.html">.Text
 ]
 
 let init() : Model =
@@ -64,6 +70,16 @@ module Extensions =
         with
         _ -> ()
 
+let icon faIcon =
+    Bulma.icon [
+        icon.isSmall
+        prop.children [
+            Html.i [
+                prop.classes [ "fas"; faIcon ]
+            ]
+        ]
+    ]
+
 let examplesDropdown active dispatch =
     Bulma.dropdown [
         if active then dropdown.isActive
@@ -71,16 +87,10 @@ let examplesDropdown active dispatch =
             Bulma.dropdownTrigger [
                 Bulma.button.button [
                     prop.ariaControls "dropdown-menu"
-                    prop.text "Examples"
                     prop.onClick (fun _ -> dispatch ToggleDropdown)
-                ]
-                Html.span [
-                    prop.className [ "icon"; "is-small" ]
                     prop.children [
-                        Html.i [
-                            prop.ariaHidden true
-                            prop.className [ "fas"; "fa-angle-down" ]
-                        ]
+                        Html.span "Examples"
+                        icon FA.FaAngleDown
                     ]
                 ]
             ]
