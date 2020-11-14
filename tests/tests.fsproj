@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Tests.fs" />
+    <Compile Include="FormatingTests.fs" />
+    <Compile Include="App.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -14,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="Fable.Mocha" Version="2.9.1" />
+    <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.3.5" />
   </ItemGroup>
 
 </Project>
