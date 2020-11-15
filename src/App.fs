@@ -1,10 +1,5 @@
 module App
 
-(**
- The famous Increment/Decrement ported from Elm.
- You can find more info about Elmish architecture and samples at https://elmish.github.io/
-*)
-
 open Elmish
 open Elmish.React
 open Feliz
@@ -198,6 +193,17 @@ let view (model:Model) dispatch =
         container.isFluid
         prop.children [
             Bulma.title.h1 "Html2Feliz"
+            Bulma.subtitle.p "Convert HTML into Feliz style code to learn the syntax"
+            Html.div [
+                prop.style [ style.marginBottom 20 ]
+                prop.children [
+                    Html.a [
+                        prop.href "https://github.com/ThisFunctionalTom/Html2Feliz"
+                        prop.text "Source code on GitHub"
+                    ]
+                ]
+            ]
+
             Bulma.columns [
                 Bulma.column [
                     column.is2
