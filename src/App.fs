@@ -218,6 +218,20 @@ let view (model:Model) dispatch =
 
             Bulma.columns [
                 Bulma.column [
+                    column.isOffset6
+                    column.is6
+                    prop.children [
+                        Bulma.button.button [
+                            color.isPrimary
+                            prop.text "Copy"
+                            prop.onClick (fun _ -> Extensions.copyToClipboard "output")
+                        ]
+                    ]
+                ]
+            ]
+
+            Bulma.columns [
+                Bulma.column [
                     column.is2
                     prop.children [
                         examplesMenu model dispatch
@@ -238,11 +252,6 @@ let view (model:Model) dispatch =
                 Bulma.column [
                     column.is6
                     prop.children [
-                        Bulma.button.button [
-                            color.isPrimary
-                            prop.text "Copy"
-                            prop.onClick (fun _ -> Extensions.copyToClipboard "output")
-                        ]
                         Bulma.box [
                             prop.id "output"
                             prop.children [
