@@ -17,6 +17,16 @@ open Fable.SimpleHttp
 
 type FA = CssClasses<"../node_modules/@fortawesome/fontawesome-free/css/all.min.css", Naming.PascalCase>
 
+module textarea =
+    open Fable.Core.JsInterop
+    open Fable.Core
+    open Feliz.Styles    [<Erase>]
+
+    type wrap =
+        static member inline off = Interop.mkAttr "wrap" "off"
+        static member inline soft = Interop.mkAttr "wrap" "soft"
+        static member inline hard = Interop.mkAttr "wrap" "hard"
+
 importSideEffects "./styles/main.scss"
 
 // MODEL
@@ -194,6 +204,7 @@ let examplesMenu model dispatch =
     ]
 
 let view (model:Model) dispatch =
+    let lineCount = model.Input |> Seq.sumBy (fun c -> if c = '\n' then 1 else 0)
     Bulma.container [
         container.isFluid
         prop.children [
@@ -209,9 +220,9 @@ let view (model:Model) dispatch =
                     column.is4
                     prop.children [
                         Bulma.textarea [
-                            prop.rows 25
-                            prop.cols 80
-                            prop.style [ style.minWidth 400 ]
+                            textarea.wrap.off
+                            prop.rows (min (lineCount+1) 50)
+                            prop.style [ style.minWidth (length.percent 40) ]
                             prop.valueOrDefault model.Input
                             prop.onChange (InputChanged >> dispatch)
                         ] |> Html.div
@@ -227,8 +238,6 @@ let view (model:Model) dispatch =
                         ]
                         Bulma.box [
                             prop.id "output"
-                            prop.rows 25
-                            prop.cols 80
                             prop.children [
                                 Html2Feliz.format model.Output
                                 |> Html.pre
