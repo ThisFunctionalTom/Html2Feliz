@@ -8,7 +8,7 @@
         "build:test": "webpack --config webpack.tests.js",
         "test": "mocha ./tests-js",
         "predeploy": "npm run build",
-        "deploy": "gh-pages -d deploy -o github"
+        "deploy": "gh-pages -d deploy"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.1",
