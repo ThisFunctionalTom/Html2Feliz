@@ -11,20 +11,18 @@ open Zanaptak.TypedCssClasses
 open Fable.SimpleHttp
 
 type FA = CssClasses<"../node_modules/@fortawesome/fontawesome-free/css/all.min.css", Naming.PascalCase>
+type Css = CssClasses<"styles/main.scss", Naming.PascalCase>
 
 module textarea =
-    open Fable.Core.JsInterop
     open Fable.Core
-    open Feliz.Styles    [<Erase>]
 
+    [<Erase>]
     type wrap =
         static member inline off = Interop.mkAttr "wrap" "off"
         static member inline soft = Interop.mkAttr "wrap" "soft"
         static member inline hard = Interop.mkAttr "wrap" "hard"
 
 importSideEffects "./styles/main.scss"
-
-// MODEL
 
 let examples = [|
     "simple header", TextFile<"examples/SimpleHeader.html">.Text
@@ -109,7 +107,6 @@ let init () : Model*Cmd<Msg> =
       DropdownIsActive = false
       ExpandedExamples = Set.singleton "Simple" }, cmd
 
-// UPDATE
 let update (msg:Msg) (model:Model) =
     match msg with
     | InputChanged content ->
@@ -143,8 +140,9 @@ let update (msg:Msg) (model:Model) =
 
 module Extensions =
     open Browser.Dom
-    let copyToClipboard nodeId =
-        let node = document.querySelector (sprintf "#%s" nodeId)
+    let copyToClipboard selector =
+        window.getSelection().removeAllRanges()
+        let node = document.querySelector selector
         let range = document.createRange()
         range.selectNode node
         window.getSelection().addRange(range)
@@ -155,17 +153,17 @@ module Extensions =
         with
         _ -> ()
 
-let icon faIcon =
-    Bulma.icon [
-        icon.isSmall
-        prop.children [
-            Html.i [
-                prop.classes [ "fas"; faIcon ]
+let examplesMenu model dispatch =
+    let menuIcon faIcon =
+        Bulma.icon [
+            icon.isSmall
+            prop.children [
+                Html.i [
+                    prop.classes [ "fas"; faIcon ]
+                ]
             ]
         ]
-    ]
 
-let examplesMenu model dispatch =
     Html.aside [
         prop.className "menu"
         prop.children [
@@ -179,8 +177,8 @@ let examplesMenu model dispatch =
                     prop.children [
                         Html.span page
                         if isExpanded
-                        then icon FA.FaAngleRight
-                        else icon FA.FaAngleDown
+                        then menuIcon FA.FaAngleRight
+                        else menuIcon FA.FaAngleDown
                     ]
                 ]
                 if isExpanded then
@@ -204,27 +202,25 @@ let view (model:Model) dispatch =
     Bulma.container [
         container.isFluid
         prop.children [
-            Bulma.title.h1 "Html2Feliz"
-            Bulma.subtitle.p "Convert HTML into Feliz style code to learn the syntax"
-            Html.div [
-                prop.style [ style.marginBottom 20 ]
-                prop.children [
-                    Html.a [
-                        prop.href "https://github.com/ThisFunctionalTom/Html2Feliz"
-                        prop.text "Source code on GitHub"
+            Bulma.navbar [
+                Bulma.navbarBrand.div [
+                    Html.div [
+                        Bulma.title.h3 "Html2Feliz"
+                        Bulma.subtitle.p "Convert HTML into Feliz style code to learn the syntax"
                     ]
                 ]
-            ]
-
-            Bulma.columns [
-                Bulma.column [
-                    column.isOffset6
-                    column.is6
-                    prop.children [
-                        Bulma.button.button [
-                            color.isPrimary
-                            prop.text "Copy"
-                            prop.onClick (fun _ -> Extensions.copyToClipboard "output")
+                Bulma.navbarMenu [
+                    Bulma.navbarEnd.div [
+                        Bulma.navbarItem.div [
+                            Html.a [
+                                prop.href "https://github.com/ThisFunctionalTom/Html2Feliz"
+                                prop.children [
+                                    Bulma.icon [
+                                        size.isSize2
+                                        prop.classes [ FA.Fab; FA.FaGithubSquare ]
+                                    ]
+                                ]
+                            ]
                         ]
                     ]
                 ]
@@ -240,13 +236,15 @@ let view (model:Model) dispatch =
                 Bulma.column [
                     column.is4
                     prop.children [
-                        Bulma.textarea [
-                            textarea.wrap.off
-                            prop.rows (min (lineCount+1) 50)
-                            prop.style [ style.minWidth (length.percent 40) ]
-                            prop.valueOrDefault model.Input
-                            prop.onChange (InputChanged >> dispatch)
-                        ] |> Html.div
+                        Bulma.box [
+                            Bulma.textarea [
+                                textarea.wrap.off
+                                prop.rows (min (lineCount+1) 50)
+                                prop.style [ style.minWidth (length.percent 40) ]
+                                prop.valueOrDefault model.Input
+                                prop.onChange (InputChanged >> dispatch)
+                            ]
+                        ]
                     ]
                 ]
                 Bulma.column [
@@ -255,17 +253,21 @@ let view (model:Model) dispatch =
                         Bulma.box [
                             prop.id "output"
                             prop.children [
-                                Html2Feliz.format model.Output
-                                |> Html.pre
+                                Bulma.button.button [
+                                    color.isPrimary
+                                    prop.className Css.CopyButton
+                                    prop.text "Copy"
+                                    prop.onClick (fun _ -> Extensions.copyToClipboard "#output>pre")
+                                ]
+                                Html.pre (Html2Feliz.format model.Output)
                             ]
-                        ] |> Html.div
+                        ]
                     ]
                 ]
             ]
         ]
     ]
 
-// App
 Program.mkProgram init update view
 |> Program.withReactSynchronous "feliz-app"
 |> Program.withConsoleTrace
