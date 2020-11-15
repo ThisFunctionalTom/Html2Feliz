@@ -4,12 +4,6 @@ open System
 open System.Collections.Generic
 open Fable.SimpleXml
 
-let rec sanitizeContent (content: string) =
-    let sanitized = content.Replace("\n", " ").Replace("\r", " ").Replace("  ", " ")
-    if content <> sanitized
-    then sanitizeContent sanitized
-    else content
-
 let capitalize ( s : string ) =
     s.[ 0 ].ToString().ToUpperInvariant() + s.[ 1 .. ].ToLowerInvariant()
 
@@ -71,7 +65,7 @@ let rec formatNode indent level (node: XmlElement) =
         match node with
         | EmptyTextNode -> ()
         | CommentNode _ -> ()
-        | TextNode text -> line level (sprintf "Html.text \"%s\"" text)
+        | TextNode text -> line level (sprintf "Html.text \"%s\"" (text.Trim()))
         | SelfClosingElement (name, attrs)
         | EmptyElement (name, attrs) ->
             if Map.isEmpty attrs
@@ -83,7 +77,7 @@ let rec formatNode indent level (node: XmlElement) =
                 line level "]"
         | EmptyElementWithText (name, attrs, text) ->
             if Map.isEmpty attrs
-            then line level (sprintf "Html.%s \"%s\"" name text)
+            then line level (sprintf "Html.%s \"%s\"" name (text.Trim()))
             else
                 line level (sprintf "Html.%s [" name)
                 for attr in attrs do
