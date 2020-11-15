@@ -51,7 +51,8 @@ let rec formatTextProp (pos: ChildPosition) (text: string) =
     match pos with
     | FirstChild -> formatted.TrimStart()
     | LastChild -> formatted.TrimEnd()
-    | _ -> formatted
+    | SingleChild -> formatted.Trim()
+    | MiddleChild -> formatted
 
 let (|CommentNode|TextNode|SelfClosingElement|EmptyElement|EmptyElementWithText|MixedNode|EmptyTextNode|) (node: XmlElement) =
     if node.IsComment then CommentNode node.Content
