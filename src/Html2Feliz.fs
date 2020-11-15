@@ -11,10 +11,47 @@ let toCamelCase (words: string []) =
     words
     |> Array.mapi (fun i s -> if i > 0 then capitalize s else s.ToLowerInvariant())
 
-let sanitizeAttributeName (attr: string) =
+let formatAttributeName (attr: string) =
     attr.Split('-')
     |> toCamelCase
     |> String.concat ""
+
+let rec compressSpaces (text: string) =
+    let compressed = text.Replace("  ", " ")
+    if compressed <> text
+    then compressSpaces compressed
+    else compressed
+
+type ChildPosition =
+| FirstChild
+| MiddleChild
+| LastChild
+| SingleChild
+
+let toPositionedChildren (children: XmlElement list) =
+    match children with
+    | [] -> [ ]
+    | [ child ] -> [ SingleChild, child ]
+    | _ ->
+        let lastIdx = children.Length - 1
+        children
+        |> List.mapi (fun idx child ->
+            if idx = 0
+            then FirstChild, child
+            elif idx = lastIdx
+            then LastChild, child
+            else MiddleChild, child)
+
+let rec formatTextProp (pos: ChildPosition) (text: string) =
+    let formatted =
+        text
+            .Replace("\n", " ")
+            .Replace("\r", " ")
+        |> compressSpaces
+    match pos with
+    | FirstChild -> formatted.TrimStart()
+    | LastChild -> formatted.TrimEnd()
+    | _ -> formatted
 
 let (|CommentNode|TextNode|SelfClosingElement|EmptyElement|EmptyElementWithText|MixedNode|EmptyTextNode|) (node: XmlElement) =
     if node.IsComment then CommentNode node.Content
@@ -39,7 +76,7 @@ let formatAttribute indent level (attr: KeyValuePair<string, string>) =
 
             sprintf "%sprop.classes [ %s ]" indentStr classes
     else
-        sprintf @"%sprop.%s ""%s""" indentStr (sanitizeAttributeName attr.Key) (attr.Value)
+        sprintf @"%sprop.%s ""%s""" indentStr (formatAttributeName attr.Key) (attr.Value)
 
 let containsOnlyCommentsOrEmptyText (elements: list<XmlElement>) =
     elements
@@ -49,7 +86,7 @@ let containsOnlyCommentsOrEmptyText (elements: list<XmlElement>) =
         isComment || isEmptyText
     )
 
-let rec formatNode indent level (node: XmlElement) =
+let rec formatNode indent level (pos: ChildPosition, node: XmlElement) =
     let line level text =
         let indentStr = String(' ', indent * level)
         sprintf "%s%s" indentStr text
@@ -65,7 +102,7 @@ let rec formatNode indent level (node: XmlElement) =
         match node with
         | EmptyTextNode -> ()
         | CommentNode _ -> ()
-        | TextNode text -> line level (sprintf "Html.text \"%s\"" (text.Trim()))
+        | TextNode text -> line level (sprintf "Html.text \"%s\"" (formatTextProp pos text))
         | SelfClosingElement (name, attrs)
         | EmptyElement (name, attrs) ->
             if Map.isEmpty attrs
@@ -77,12 +114,12 @@ let rec formatNode indent level (node: XmlElement) =
                 line level "]"
         | EmptyElementWithText (name, attrs, text) ->
             if Map.isEmpty attrs
-            then line level (sprintf "Html.%s \"%s\"" name (text.Trim()))
+            then line level (sprintf "Html.%s \"%s\"" name (formatTextProp pos text))
             else
                 line level (sprintf "Html.%s [" name)
                 for attr in attrs do
                     formatAttribute indent (level + 1) attr
-                line (level+1) (sprintf "prop.text \"%s\"" (text.Trim()))
+                line (level+1) (sprintf "prop.text \"%s\"" (formatTextProp pos text))
                 line level "]"
         | MixedNode (name, attrs, children) ->
             if not attrs.IsEmpty then
@@ -92,7 +129,7 @@ let rec formatNode indent level (node: XmlElement) =
 
                 if not children.IsEmpty && not (containsOnlyCommentsOrEmptyText children) then
                     line (level+1) "prop.children ["
-                    for child in children do
+                    for child in toPositionedChildren children do
                         yield! formatNode indent (level+2) child
                     line (level+1) "]"
 
@@ -101,13 +138,13 @@ let rec formatNode indent level (node: XmlElement) =
                 // when there are no attributes
                 // no need for prop.children
                 line level (sprintf "Html.%s [" name)
-                for child in children do
+                for child in toPositionedChildren children do
                     yield! formatNode indent (level+1) child
                 line level "]"
     }
 
 let format (nodes: XmlElement list) =
-    [ for node in nodes do
+    [ for node in toPositionedChildren nodes do
         yield! formatNode 4 0 node ]
     |> String.concat "\n"
 

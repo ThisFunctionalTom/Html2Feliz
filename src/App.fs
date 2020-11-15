@@ -24,6 +24,7 @@ let examples = [|
     "self closing element", TextFile<"examples/SelfClosingElement.html">.Text
     "empty element", TextFile<"examples/EmptyElement.html">.Text
     "empty element with text", TextFile<"examples/EmptyElementWithText.html">.Text
+    "significant spaces", TextFile<"examples/TextWithSignificantSpaces.html">.Text
 |]
 
 type Model = {

@@ -3,14 +3,13 @@ module FormattingTests
 open System
 open Fable.Mocha
 open FSharp.Data.LiteralProviders
-open Fable.SimpleXml
 
 type String with
     member str.ShowWs =
         str.Replace(' ', '.')
             // .Replace(' ', '␠')
-        //    .Replace('\r', '␍')
-        //    .Replace('\n', '␤')
+            .Replace('\r', '␍')
+            .Replace('\n', '␤')
 
 let testConversion (name: string, htmlStr: string, expected: string) =
     testCase name <| fun _ ->
@@ -37,12 +36,10 @@ let formattingTests =
         "paragraph with class",
             TextFile<"data/ParagraphWithClass.html">.Text,
             TextFile<"data/ParagraphWithClass.fs">.Text
+
+        "div with text and children",
+            TextFile<"data/DivWithTextAndChildren.html">.Text,
+            TextFile<"data/DivWithTextAndChildren.fs">.Text
     ]
     |> List.map testConversion
-    |> List.append [
-        testCase "Show me the money" <| fun _ ->
-            SimpleXml.parseElement """<div class="some-class">Transactions<strong>hello</strong></div>"""
-            |> fun x -> sprintf "Content: (%s) (isEmpty: %b)" x.Content (x.Content = "")
-            |> Expect.isTrue false
-    ]
     |> testList "Formatting tests"
