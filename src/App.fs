@@ -24,34 +24,62 @@ module textarea =
 
 importSideEffects "./styles/main.scss"
 
-let examples = [|
-    "simple header", TextFile<"examples/SimpleHeader.html">.Text
-    "simple body", TextFile<"examples/SimpleBody.html">.Text
-    "paragraph with class", TextFile<"examples/ParagraphWithStyle.html">.Text
-    "comments are ignored", TextFile<"examples/CommentNode.html">.Text
-    "self closing element", TextFile<"examples/SelfClosingElement.html">.Text
-    "empty element", TextFile<"examples/EmptyElement.html">.Text
-    "empty element with text", TextFile<"examples/EmptyElementWithText.html">.Text
-    "significant spaces", TextFile<"examples/TextWithSignificantSpaces.html">.Text
-|]
+let examples =
+    let simpleHeader =
+        TextFile<"examples/SimpleHeader.html">.Text
 
-type Model = {
-  Examples: Map<string, (string*string) array>
-  Input: string
-  Output: XmlElement list
-  DropdownIsActive: bool
-  ExpandedExamples: Set<string>
-}
+    let simpleBody =
+        TextFile<"examples/SimpleBody.html">.Text
+
+    let paraWithClass =
+        TextFile<"examples/ParagraphWithStyle.html">.Text
+
+    let comments =
+        TextFile<"examples/CommentNode.html">.Text
+
+    let selfClosing =
+        TextFile<"examples/SelfClosingElement.html">.Text
+
+    let emptyElement =
+        TextFile<"examples/EmptyElement.html">.Text
+
+    let emptyWithText =
+        TextFile<"examples/EmptyElementWithText.html">
+            .Text
+
+    let textWithSpace =
+        TextFile<"examples/TextWithSignificantSpaces.html">
+            .Text
+
+    [| "simple header", simpleHeader
+       "simple body", simpleBody
+       "paragraph with class", paraWithClass
+       "comments are ignored", comments
+       "self closing element", selfClosing
+       "empty element", emptyElement
+       "empty element with text", emptyWithText
+       "significant spaces", textWithSpace |]
+
+type Model =
+    { Examples: Map<string, (string * string) array>
+      Input: string
+      Output: XmlElement list
+      DropdownIsActive: bool
+      ExpandedExamples: Set<string> }
 
 type Msg =
-| InputChanged of string
-| SelectExample of string*string
-| BulmaExampleLoaded of {| Page: string; StatusCode: int; Content: string |}
-| ToggleDropdown
-| ToggleExampleExpanded of string
+    | InputChanged of string
+    | SelectExample of string * string
+    | BulmaExampleLoaded of
+        {| Page: string
+           StatusCode: int
+           Content: string |}
+    | ToggleDropdown
+    | ToggleExampleExpanded of string
 
 module BulmaExamples =
-    let docs = "https://raw.githubusercontent.com/jgthms/bulma/master/docs/documentation/"
+    let docs =
+        "https://raw.githubusercontent.com/jgthms/bulma/master/docs/documentation/"
 
     let getExamples pages =
         let toMessage page (statusCode, content) =
@@ -59,6 +87,7 @@ module BulmaExamples =
                 {| Page = page
                    StatusCode = statusCode
                    Content = content |}
+
         Cmd.batch [
             for page in pages do
                 Cmd.OfAsync.perform Http.get (sprintf "%s/%s.html" docs page) (toMessage page)
@@ -77,7 +106,8 @@ module BulmaExamples =
           "progress"
           "table"
           "tag"
-          "title" ] |> List.map (sprintf "elements/%s")
+          "title" ]
+        |> List.map (sprintf "elements/%s")
 
     let components =
         [ "breadcrumb"
@@ -92,66 +122,84 @@ module BulmaExamples =
           "navbar"
           "pagination"
           "panel"
-          "tabs" ] |> List.map (sprintf "components/%s")
+          "tabs" ]
+        |> List.map (sprintf "components/%s")
 
     let getAllExamples =
         List.concat [ elements; components ]
         |> getExamples
 
-let init () : Model*Cmd<Msg> =
+let init () : Model * Cmd<Msg> =
     let cmd = BulmaExamples.getAllExamples
     let input = snd (Array.head examples)
+
     { Examples = Map.ofList [ "Simple", examples ]
       Input = input
       Output = Html2Feliz.parse input
       DropdownIsActive = false
-      ExpandedExamples = Set.singleton "Simple" }, cmd
+      ExpandedExamples = Set.singleton "Simple" },
+    cmd
 
-let update (msg:Msg) (model:Model) =
+let update (msg: Msg) (model: Model) =
     match msg with
     | InputChanged content ->
-        { model with Input = content; Output = Html2Feliz.parse content }, Cmd.none
+        { model with
+              Input = content
+              Output = Html2Feliz.parse content },
+        Cmd.none
     | SelectExample (page, name) ->
         let content =
             model.Examples.[page]
             |> Array.pick (fun (n, c) -> if n = name then Some c else None)
+
         { model with
-            Input = content;
-            Output = Html2Feliz.parse content
-            DropdownIsActive = false }, Cmd.none
-    | ToggleDropdown -> { model with DropdownIsActive = not model.DropdownIsActive }, Cmd.none
+              Input = content
+              Output = Html2Feliz.parse content
+              DropdownIsActive = false },
+        Cmd.none
+    | ToggleDropdown ->
+        { model with
+              DropdownIsActive = not model.DropdownIsActive },
+        Cmd.none
     | ToggleExampleExpanded page ->
         let expanded =
-            if model.ExpandedExamples.Contains page
-            then Set.remove page model.ExpandedExamples
-            else Set.add page model.ExpandedExamples
-        { model with ExpandedExamples = expanded }, Cmd.none
+            if model.ExpandedExamples.Contains page then
+                Set.remove page model.ExpandedExamples
+            else
+                Set.add page model.ExpandedExamples
+
+        { model with
+              ExpandedExamples = expanded },
+        Cmd.none
     | BulmaExampleLoaded result ->
         let examples =
             BulmaExampleParser.getExamples result.Content
-            |> Array.choose (fun (name, example) ->
-                Html2Feliz.tryParse example
-                |> Option.map (fun _ -> name, example))
-        if Array.isEmpty examples
-        then model, Cmd.none
+            |> Array.choose
+                (fun (name, example) ->
+                    Html2Feliz.tryParse example
+                    |> Option.map (fun _ -> name, example))
+
+        if Array.isEmpty examples then
+            model, Cmd.none
         else
             { model with
-                Examples = Map.add result.Page examples model.Examples }, Cmd.none
+                  Examples = Map.add result.Page examples model.Examples },
+            Cmd.none
 
 module Extensions =
     open Browser.Dom
+
     let copyToClipboard selector =
-        window.getSelection().removeAllRanges()
+        window.getSelection().removeAllRanges ()
         let node = document.querySelector selector
-        let range = document.createRange()
+        let range = document.createRange ()
         range.selectNode node
-        window.getSelection().addRange(range)
+        window.getSelection().addRange (range)
 
         try
-            document.execCommand("copy") |> ignore
-            window.getSelection().removeAllRanges()
-        with
-        _ -> ()
+            document.execCommand ("copy") |> ignore
+            window.getSelection().removeAllRanges ()
+        with _ -> ()
 
 let examplesMenu model dispatch =
     let menuIcon faIcon =
@@ -170,17 +218,20 @@ let examplesMenu model dispatch =
             for kv in model.Examples do
                 let page = kv.Key
                 let isExpanded = model.ExpandedExamples.Contains page
+
                 Html.p [
                     prop.className "menu-label"
                     prop.style [ style.cursor.pointer ]
                     prop.onClick (fun _ -> dispatch (ToggleExampleExpanded page))
                     prop.children [
                         Html.span page
-                        if isExpanded
-                        then menuIcon FA.FaAngleRight
-                        else menuIcon FA.FaAngleDown
+                        if isExpanded then
+                            menuIcon FA.FaAngleRight
+                        else
+                            menuIcon FA.FaAngleDown
                     ]
                 ]
+
                 if isExpanded then
                     Html.ul [
                         prop.className "menu-list"
@@ -189,7 +240,7 @@ let examplesMenu model dispatch =
                                 Html.li [
                                     Html.a [
                                         prop.text name
-                                        prop.onClick (fun _ -> dispatch (SelectExample (page, name)))
+                                        prop.onClick (fun _ -> dispatch (SelectExample(page, name)))
                                     ]
                                 ]
                         ]
@@ -197,74 +248,99 @@ let examplesMenu model dispatch =
         ]
     ]
 
-let view (model:Model) dispatch =
-    let lineCount = model.Input |> Seq.sumBy (fun c -> if c = '\n' then 1 else 0)
+let navbar =
+    let brand =
+        Bulma.navbarBrand.div [
+            Html.div [
+                Bulma.title.h3 "Html2Feliz"
+                Bulma.subtitle.p "Convert HTML into Feliz style code to learn the syntax"
+            ]
+        ]
+
+    let menu =
+        Bulma.navbarMenu [
+            Bulma.navbarEnd.div [
+                Bulma.navbarItem.div [
+                    Html.a [
+                        prop.href "https://github.com/ThisFunctionalTom/Html2Feliz"
+                        prop.children [
+                            Bulma.icon [
+                                size.isSize2
+                                prop.classes [
+                                    FA.Fab
+                                    FA.FaGithubSquare
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+    Bulma.navbar [ brand; menu ]
+
+let listOfExamplesCol model dispatch =
+    Bulma.column [
+        column.is2
+        prop.children [
+            examplesMenu model dispatch
+        ]
+    ]
+
+let inputCol model dispatch =
+    let lineCount =
+        model.Input
+        |> Seq.sumBy (fun c -> if c = '\n' then 1 else 0)
+
+    Bulma.column [
+        column.is4
+        prop.children [
+            Bulma.box [
+                Bulma.textarea [
+                    textarea.wrap.off
+                    prop.rows (min (lineCount + 1) 50)
+                    prop.style [
+                        style.minWidth (length.percent 40)
+                    ]
+                    prop.valueOrDefault model.Input
+                    prop.onChange (InputChanged >> dispatch)
+                ]
+            ]
+        ]
+    ]
+
+let outputCol model dispatch =
+    Bulma.column [
+        column.is6
+        prop.children [
+            Bulma.box [
+                prop.id "output"
+                prop.children [
+                    Bulma.button.button [
+                        color.isPrimary
+                        prop.className Css.CopyButton
+                        prop.text "Copy"
+                        prop.onClick (fun _ -> Extensions.copyToClipboard "#output>pre")
+                    ]
+                    Html.pre (Html2Feliz.format model.Output)
+                ]
+            ]
+        ]
+    ]
+
+let content model dispatch =
+    Bulma.columns [
+        listOfExamplesCol model dispatch
+        inputCol model dispatch
+        outputCol model dispatch
+    ]
+
+let view (model: Model) dispatch =
     Bulma.container [
         container.isFluid
         prop.children [
-            Bulma.navbar [
-                Bulma.navbarBrand.div [
-                    Html.div [
-                        Bulma.title.h3 "Html2Feliz"
-                        Bulma.subtitle.p "Convert HTML into Feliz style code to learn the syntax"
-                    ]
-                ]
-                Bulma.navbarMenu [
-                    Bulma.navbarEnd.div [
-                        Bulma.navbarItem.div [
-                            Html.a [
-                                prop.href "https://github.com/ThisFunctionalTom/Html2Feliz"
-                                prop.children [
-                                    Bulma.icon [
-                                        size.isSize2
-                                        prop.classes [ FA.Fab; FA.FaGithubSquare ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-
-            Bulma.columns [
-                Bulma.column [
-                    column.is2
-                    prop.children [
-                        examplesMenu model dispatch
-                    ]
-                ]
-                Bulma.column [
-                    column.is4
-                    prop.children [
-                        Bulma.box [
-                            Bulma.textarea [
-                                textarea.wrap.off
-                                prop.rows (min (lineCount+1) 50)
-                                prop.style [ style.minWidth (length.percent 40) ]
-                                prop.valueOrDefault model.Input
-                                prop.onChange (InputChanged >> dispatch)
-                            ]
-                        ]
-                    ]
-                ]
-                Bulma.column [
-                    column.is6
-                    prop.children [
-                        Bulma.box [
-                            prop.id "output"
-                            prop.children [
-                                Bulma.button.button [
-                                    color.isPrimary
-                                    prop.className Css.CopyButton
-                                    prop.text "Copy"
-                                    prop.onClick (fun _ -> Extensions.copyToClipboard "#output>pre")
-                                ]
-                                Html.pre (Html2Feliz.format model.Output)
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            navbar
+            content model dispatch
         ]
     ]
 

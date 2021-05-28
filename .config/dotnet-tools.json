@@ -7,6 +7,12 @@
       "commands": [
         "femto"
       ]
+    },
+    "fantomas-tool": {
+      "version": "4.4.0",
+      "commands": [
+        "fantomas"
+      ]
     }
   }
 }
