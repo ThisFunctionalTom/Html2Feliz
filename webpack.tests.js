@@ -7,9 +7,8 @@
 // Dependencies. Also required: core-js, fable-loader, fable-compiler, @babel/core,
 // @babel/preset-env, babel-loader
 var path = require("path");
-var webpack = require("webpack");
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
+var HtmlWebpackPlugin = require("html-webpack-plugin");
+var CopyWebpackPlugin = require("copy-webpack-plugin");
 var MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 var CONFIG = {
@@ -29,42 +28,49 @@ var CONFIG = {
         presets: [
             // In case interop is used with React/Jsx components, this React preset would be required
             ["@babel/preset-react"],
-            ["@babel/preset-env", {
-                "targets": "> 0.25%, not dead",
-                "modules": false,
-                // This adds polyfills when needed. Requires core-js dependency.
-                // See https://babeljs.io/docs/en/babel-preset-env#usebuiltins
-                "useBuiltIns": "usage",
-                "corejs": 3
-            }]
+            [
+                "@babel/preset-env",
+                {
+                    targets: "> 0.25%, not dead",
+                    modules: false,
+                    // This adds polyfills when needed. Requires core-js dependency.
+                    // See https://babeljs.io/docs/en/babel-preset-env#usebuiltins
+                    useBuiltIns: "usage",
+                    corejs: 3,
+                },
+            ],
         ],
-    }
-}
+    },
+};
 
 // If we're running the webpack-dev-server, assume we're in development mode
-var isProduction = !process.argv.find(v => v.indexOf('webpack-dev-server') !== -1);
-console.log("Bundling for " + (isProduction ? "production" : "development") + "...");
+var isProduction = !process.argv.find(
+    (v) => v.indexOf("webpack-dev-server") !== -1
+);
+console.log(
+    "Bundling for " + (isProduction ? "production" : "development") + "..."
+);
 
 // The HtmlWebpackPlugin allows us to use a template for the index.html page
 // and automatically injects <script> or <link> tags for generated bundles.
 var commonPlugins = [
     new HtmlWebpackPlugin({
-        filename: 'index.html',
-        template: resolve(CONFIG.indexHtmlTemplate)
-    })
+        filename: "index.html",
+        template: resolve(CONFIG.indexHtmlTemplate),
+    }),
 ];
 
 module.exports = {
     // In development, bundle styles together with the code so they can also
     // trigger hot reloads. In production, put them in a separate CSS file.
     entry: {
-        app: [resolve(CONFIG.fsharpEntry)]
+        app: [resolve(CONFIG.fsharpEntry)],
     },
     // Add a hash to the output file name in production
     // to prevent browser caching if code changes
     output: {
         path: resolve(CONFIG.outputDir),
-        filename: isProduction ? '[name].[hash].js' : '[name].js'
+        filename: isProduction ? "[name].[hash].js" : "[name].js",
     },
     mode: isProduction ? "production" : "development",
     devtool: isProduction ? "source-map" : "eval-source-map",
@@ -76,16 +82,14 @@ module.exports = {
                 commons: {
                     test: /node_modules/,
                     name: "vendors",
-                    chunks: "all"
-                }
-            }
+                    chunks: "all",
+                },
+            },
         },
     },
     plugins: commonPlugins.concat([
         new CopyWebpackPlugin({
-            patterns: [
-                { from: resolve(CONFIG.assetsDir) }
-            ]
+            patterns: [{ from: resolve(CONFIG.assetsDir) }],
         }),
     ]),
 
@@ -96,8 +100,8 @@ module.exports = {
         alias: {
             // Some old libraries still use an old specific version of core-js
             // Redirect the imports of these libraries to the newer core-js
-            'core-js/es6': 'core-js/es'
-        }
+            "core-js/es6": "core-js/es",
+        },
     },
     // Configuration for webpack-dev-server
     devServer: {
@@ -106,7 +110,7 @@ module.exports = {
         port: CONFIG.devServerPort,
         proxy: CONFIG.devServerProxy,
         hot: true,
-        inline: true
+        inline: true,
     },
     // - fable-loader: transforms F# into JS
     // - babel-loader: transforms JS to old syntax (compatible with old browsers)
@@ -119,39 +123,39 @@ module.exports = {
                 use: {
                     loader: "fable-loader",
                     options: {
-                        babel: CONFIG.babel
-                    }
-                }
+                        babel: CONFIG.babel,
+                    },
+                },
             },
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 use: {
-                    loader: 'babel-loader',
-                    options: CONFIG.babel
-                }
+                    loader: "babel-loader",
+                    options: CONFIG.babel,
+                },
             },
             {
                 test: /\.(sass|scss|css)$/,
                 use: [
-                    isProduction
-                        ? MiniCssExtractPlugin.loader
-                        : 'style-loader',
-                    'css-loader',
+                    isProduction ? MiniCssExtractPlugin.loader : "style-loader",
+                    "css-loader",
                     {
-                        loader: 'sass-loader',
-                        options: { implementation: require("sass") }
-                    }
+                        loader: "sass-loader",
+                        options: { implementation: require("sass") },
+                    },
                 ],
             },
             {
                 test: /\.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)(\?.*)?$/,
-                use: ["file-loader"]
-            }
-        ]
-    }
+                use: ["file-loader"],
+            },
+        ],
+    },
 };
 
 function resolve(filePath) {
-    return path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath);
+    return path.isAbsolute(filePath)
+        ? filePath
+        : path.join(__dirname, filePath);
 }

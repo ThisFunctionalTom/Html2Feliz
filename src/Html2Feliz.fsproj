@@ -1,27 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>preview</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="BulmaExampleParser.fs" />
-    <Compile Include="Html2Feliz.fs" />
-    <Compile Include="App.fs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Fable.Collections.fs" />
+        <Compile Include="Fable.IO.fs" />
+        <Compile Include="TextConversions.fs" />
+        <Compile Include="HtmlCharRefs.fs" />
+        <Compile Include="HtmlParser.fs" />
+        <Compile Include="BulmaExampleParser.fs" />
+        <Compile Include="Html2Feliz.fs" />
+        <Compile Include="Xml2Feliz.fs" />
+        <Compile Include="App.fs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="5.0" />
-    <PackageReference Include="Fable.Core" Version="3.1.6" />
-    <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
-    <PackageReference Include="Fable.SimpleHttp" Version="3.0.0" />
-    <PackageReference Include="Fable.SimpleXml" Version="3.2.0" />
-    <PackageReference Include="Feliz" Version="1.16.0" />
-    <PackageReference Include="Feliz.Bulma" Version="2.4.0" />
-    <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.3.5" />
-    <PackageReference Include="Zanaptak.TypedCssClasses" Version="0.4.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Update="FSharp.Core" Version="5.0" />
+        <PackageReference Include="Fable.Core" Version="3.1.6" />
+        <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
+        <PackageReference Include="Fable.SimpleHttp" Version="3.0.0" />
+        <PackageReference Include="Fable.SimpleXml" Version="3.2.0" />
+        <PackageReference Include="Feliz" Version="1.16.0" />
+        <PackageReference Include="Feliz.Bulma" Version="2.4.0" />
+        <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.3.5" />
+        <PackageReference Include="Zanaptak.TypedCssClasses" Version="0.4.0" />
+    </ItemGroup>
 
 </Project>

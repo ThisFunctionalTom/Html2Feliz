@@ -1,7 +1,12 @@
 @import "bulma";
-@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import "@fortawesome/fontawesome-free/css/all.min.css";
 
 .copy-button {
     position: absolute;
-    right: 1.6*$gap;
+    right: 26.7 * $gap;
+}
+
+.copy-button2 {
+    position: absolute;
+    right: 1.6 * $gap;
 }

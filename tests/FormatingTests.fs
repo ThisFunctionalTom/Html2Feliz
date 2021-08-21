@@ -19,7 +19,7 @@ let testConversion (name: string, htmlStr: string, expected: string) =
     testCase name
     <| fun _ ->
         let actual =
-            Html2Feliz.parse htmlStr |> Html2Feliz.format
+            Xml2Feliz.parse htmlStr |> Xml2Feliz.format
 
         let expected' = expected.Replace("\r", "")
         Expect.equal actual.ShowWs expected'.ShowWs "should be equal"

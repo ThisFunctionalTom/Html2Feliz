@@ -9,9 +9,10 @@ open FSharp.Data.LiteralProviders
 open Fable.Core.JsInterop
 open Zanaptak.TypedCssClasses
 open Fable.SimpleHttp
+open FSharp.Data
 
 type FA = CssClasses<"../node_modules/@fortawesome/fontawesome-free/css/all.min.css", Naming.PascalCase>
-type Css = CssClasses<"styles/main.scss", Naming.PascalCase>
+type Css = CssClasses<"../src/styles/main.scss", Naming.PascalCase>
 
 module textarea =
     open Fable.Core
@@ -64,6 +65,7 @@ type Model =
     { Examples: Map<string, (string * string) array>
       Input: string
       Output: XmlElement list
+      Output2: HtmlNode list
       DropdownIsActive: bool
       ExpandedExamples: Set<string> }
 
@@ -135,7 +137,8 @@ let init () : Model * Cmd<Msg> =
 
     { Examples = Map.ofList [ "Simple", examples ]
       Input = input
-      Output = Html2Feliz.parse input
+      Output = Xml2Feliz.parse input
+      Output2 = HtmlNode.Parse input
       DropdownIsActive = false
       ExpandedExamples = Set.singleton "Simple" },
     cmd
@@ -145,7 +148,8 @@ let update (msg: Msg) (model: Model) =
     | InputChanged content ->
         { model with
               Input = content
-              Output = Html2Feliz.parse content },
+              Output = Xml2Feliz.parse content
+              Output2 = HtmlNode.Parse content },
         Cmd.none
     | SelectExample (page, name) ->
         let content =
@@ -154,7 +158,8 @@ let update (msg: Msg) (model: Model) =
 
         { model with
               Input = content
-              Output = Html2Feliz.parse content
+              Output = Xml2Feliz.parse content
+              Output2 = HtmlNode.Parse content
               DropdownIsActive = false },
         Cmd.none
     | ToggleDropdown ->
@@ -176,7 +181,7 @@ let update (msg: Msg) (model: Model) =
             BulmaExampleParser.getExamples result.Content
             |> Array.choose
                 (fun (name, example) ->
-                    Html2Feliz.tryParse example
+                    Xml2Feliz.tryParse example
                     |> Option.map (fun _ -> name, example))
 
         if Array.isEmpty examples then
@@ -199,7 +204,8 @@ module Extensions =
         try
             document.execCommand ("copy") |> ignore
             window.getSelection().removeAllRanges ()
-        with _ -> ()
+        with
+        | _ -> ()
 
 let examplesMenu model dispatch =
     let menuIcon faIcon =
@@ -252,7 +258,7 @@ let navbar =
     let brand =
         Bulma.navbarBrand.div [
             Html.div [
-                Bulma.title.h3 "Html2Feliz"
+                Bulma.title.h3 "Xml2Feliz"
                 Bulma.subtitle.p "Convert HTML into Feliz style code to learn the syntax"
             ]
         ]
@@ -262,7 +268,7 @@ let navbar =
             Bulma.navbarEnd.div [
                 Bulma.navbarItem.div [
                     Html.a [
-                        prop.href "https://github.com/ThisFunctionalTom/Html2Feliz"
+                        prop.href "https://github.com/ThisFunctionalTom/Xml2Feliz"
                         prop.children [
                             Bulma.icon [
                                 size.isSize2
@@ -293,7 +299,7 @@ let inputCol model dispatch =
         |> Seq.sumBy (fun c -> if c = '\n' then 1 else 0)
 
     Bulma.column [
-        column.is4
+        column.is2
         prop.children [
             Bulma.box [
                 Bulma.textarea [
@@ -311,7 +317,7 @@ let inputCol model dispatch =
 
 let outputCol model dispatch =
     Bulma.column [
-        column.is6
+        column.is4
         prop.children [
             Bulma.box [
                 prop.id "output"
@@ -322,7 +328,26 @@ let outputCol model dispatch =
                         prop.text "Copy"
                         prop.onClick (fun _ -> Extensions.copyToClipboard "#output>pre")
                     ]
-                    Html.pre (Html2Feliz.format model.Output)
+                    Html.pre (Xml2Feliz.format model.Output)
+                ]
+            ]
+        ]
+    ]
+
+let output2Col model dispatch =
+    Bulma.column [
+        column.is4
+        prop.children [
+            Bulma.box [
+                prop.id "output2"
+                prop.children [
+                    Bulma.button.button [
+                        color.isPrimary
+                        prop.className Css.CopyButton2
+                        prop.text "Copy"
+                        prop.onClick (fun _ -> Extensions.copyToClipboard "#output2>pre")
+                    ]
+                    Html.pre (MyHtml2Feliz.format model.Output2)
                 ]
             ]
         ]
@@ -333,6 +358,7 @@ let content model dispatch =
         listOfExamplesCol model dispatch
         inputCol model dispatch
         outputCol model dispatch
+        output2Col model dispatch
     ]
 
 let view (model: Model) dispatch =

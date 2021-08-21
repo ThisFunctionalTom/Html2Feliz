@@ -1,22 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="FormatingTests.fs" />
-    <Compile Include="BulmaExampleParserTests.fs" />
-    <Compile Include="App.fs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="FormatingTests.fs" />
+        <Compile Include="BulmaExampleParserTests.fs" />
+        <Compile Include="App.fs" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\src\Html2Feliz.fsproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\src\Html2Feliz.fsproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fable.Mocha" Version="2.9.1" />
-    <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.3.5" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Fable.Mocha" Version="2.9.1" />
+        <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.3.5" />
+    </ItemGroup>
 
 </Project>

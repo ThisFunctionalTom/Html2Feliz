@@ -1,3 +1,6 @@
+[*]
+indent_size = 4
+
 [*.fs]
 indent_size = 4
 indent_style = space
