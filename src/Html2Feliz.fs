@@ -16,16 +16,11 @@ let toCamelCase (words: string []) =
 
     words |> Array.mapi convertWord
 
-let nameMaps =
-    [ "type", "type'"
-      "fieldset", "fieldSet" ]
-    |> Map.ofList
-
 let formatAttributeName (attr: string) =
     let name =
         attr.Split('-') |> toCamelCase |> String.concat ""
 
-    nameMaps
+    Mappings.propNames
     |> Map.tryFind name
     |> Option.defaultValue name
 
@@ -68,12 +63,38 @@ let rec formatTextProp (pos: ChildPosition) (text: string) =
     | SingleChild -> formatted.Trim()
     | MiddleChild -> formatted
 
-let formatAttribute indent level (HtmlAttribute (name, value)) =
+let inline tryParse<'a> (f: string -> (bool * 'a)) value : option<string> =
+    match f value with
+    | true, x -> Some(string x)
+    | _ -> None
+
+let formatAttributeValue name value =
+    Mappings.propertyTypes
+    |> Map.tryFind name
+    |> Option.defaultValue List.empty
+    |> List.sortBy
+        (fun propType ->
+            [ "bool"; "int"; "float" ]
+            |> List.findIndex ((=) propType))
+    |> List.map
+        (fun types ->
+            printfn $"{name}: {types}"
+            types)
+    |> List.tryPick
+        (fun propType ->
+            match propType with
+            | "bool" -> tryParse Boolean.TryParse value
+            | "int" -> tryParse Int32.TryParse value
+            | "float" -> tryParse Double.TryParse value
+            | _ -> None)
+    |> Option.defaultValue $"\"{value}\""
+
+let formatAttribute indent level (HtmlAttribute (attrName, attrValue)) =
     let indentStr = String(' ', indent * level)
 
-    match name with
+    match attrName with
     | "class" ->
-        let classes = value.Split(' ')
+        let classes = attrValue.Split(' ')
 
         match classes with
         | [| single |] -> $"{indentStr}prop.className \"{single}\""
@@ -85,35 +106,10 @@ let formatAttribute indent level (HtmlAttribute (name, value)) =
 
             $"{indentStr}prop.classes [ {classes} ]"
     | _ ->
-        let name = formatAttributeName name
+        let propName = formatAttributeName attrName
+        let propValue = formatAttributeValue attrName attrValue
 
-        let inline fromTryParse f =
-            match f value with
-            | true, x -> Some(string x)
-            | _ -> None
-
-        let value =
-            PropertyTypes.propertyTypes
-            |> Map.tryFind name
-            |> Option.defaultValue List.empty
-            |> List.sortBy
-                (fun propType ->
-                    [ "bool"; "int"; "float" ]
-                    |> List.findIndex ((=) propType))
-            |> List.map
-                (fun types ->
-                    printfn $"{name}: {types}"
-                    types)
-            |> List.tryPick
-                (fun propType ->
-                    match propType with
-                    | "bool" -> fromTryParse Boolean.TryParse
-                    | "int" -> fromTryParse Int32.TryParse
-                    | "float" -> fromTryParse Double.TryParse
-                    | _ -> None)
-            |> Option.defaultValue $"\"{value}\""
-
-        sprintf $@"{indentStr}prop.{name} {value}"
+        sprintf $@"{indentStr}prop.{propName} {propValue}"
 
 let containsOnlyCommentsOrEmptyText (elements: HtmlNode list) =
     elements
@@ -133,9 +129,8 @@ let (|EmptyChildren|SingleTextNode|Children|) (elements: HtmlNode list) =
     | [ HtmlText text ] -> SingleTextNode text
     | _ -> Children elements
 
-
 let formatNodeName (name: string) =
-    nameMaps
+    Mappings.htmlNames
     |> Map.tryFind name
     |> Option.defaultValue name
 
