@@ -299,7 +299,7 @@ let inputCol model dispatch =
         |> Seq.sumBy (fun c -> if c = '\n' then 1 else 0)
 
     Bulma.column [
-        column.is2
+        column.is4
         prop.children [
             Bulma.box [
                 Bulma.textarea [
@@ -315,9 +315,9 @@ let inputCol model dispatch =
         ]
     ]
 
-let outputCol model dispatch =
+let outputXml2Feliz model dispatch =
     Bulma.column [
-        column.is4
+        column.is6
         prop.children [
             Bulma.box [
                 prop.id "output"
@@ -334,9 +334,9 @@ let outputCol model dispatch =
         ]
     ]
 
-let output2Col model dispatch =
+let outputHtml2Feliz model dispatch =
     Bulma.column [
-        column.is4
+        column.is6
         prop.children [
             Bulma.box [
                 prop.id "output2"
@@ -347,7 +347,7 @@ let output2Col model dispatch =
                         prop.text "Copy"
                         prop.onClick (fun _ -> Extensions.copyToClipboard "#output2>pre")
                     ]
-                    Html.pre (MyHtml2Feliz.format model.Output2)
+                    Html.pre (Html2Feliz.format model.Output2)
                 ]
             ]
         ]
@@ -357,8 +357,8 @@ let content model dispatch =
     Bulma.columns [
         listOfExamplesCol model dispatch
         inputCol model dispatch
-        outputCol model dispatch
-        output2Col model dispatch
+        //outputXml2Feliz model dispatch
+        outputHtml2Feliz model dispatch
     ]
 
 let view (model: Model) dispatch =

@@ -16,8 +16,16 @@ let toCamelCase (words: string []) =
 
     words |> Array.mapi convertWord
 
+let keywords = [ "type" ]
+
 let formatAttributeName (attr: string) =
-    attr.Split('-') |> toCamelCase |> String.concat ""
+    let name =
+        attr.Split('-') |> toCamelCase |> String.concat ""
+
+    if keywords |> List.contains name then
+        $"{name}'"
+    else
+        name
 
 let rec compressSpaces (text: string) =
     let compressed = text.Replace("  ", " ")
@@ -61,7 +69,8 @@ let rec formatTextProp (pos: ChildPosition) (text: string) =
 let formatAttribute indent level (HtmlAttribute (name, value)) =
     let indentStr = String(' ', indent * level)
 
-    if name = "class" then
+    match name with
+    | "class" ->
         let classes = value.Split(' ')
 
         match classes with
@@ -73,8 +82,7 @@ let formatAttribute indent level (HtmlAttribute (name, value)) =
                 |> String.concat "; "
 
             sprintf "%sprop.classes [ %s ]" indentStr classes
-    else
-        sprintf @"%sprop.%s ""%s""" indentStr (formatAttributeName name) value
+    | _ -> sprintf $@"{indentStr}prop.{formatAttributeName name} ""{value}"""
 
 let containsOnlyCommentsOrEmptyText (elements: HtmlNode list) =
     elements
