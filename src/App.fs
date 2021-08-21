@@ -4,7 +4,6 @@ open Elmish
 open Elmish.React
 open Feliz
 open Feliz.Bulma
-open Fable.SimpleXml
 open FSharp.Data.LiteralProviders
 open Fable.Core.JsInterop
 open Zanaptak.TypedCssClasses
@@ -64,8 +63,7 @@ let examples =
 type Model =
     { Examples: Map<string, (string * string) array>
       Input: string
-      Output: XmlElement list
-      Output2: HtmlNode list
+      Output: Result<HtmlNode list, string>
       DropdownIsActive: bool
       ExpandedExamples: Set<string> }
 
@@ -131,14 +129,19 @@ module BulmaExamples =
         List.concat [ elements; components ]
         |> getExamples
 
+let parse htmlStr =
+    try
+        HtmlNode.Parse htmlStr |> Ok
+    with
+    | err -> Error $"{err}"
+
 let init () : Model * Cmd<Msg> =
     let cmd = BulmaExamples.getAllExamples
     let input = snd (Array.head examples)
 
     { Examples = Map.ofList [ "Simple", examples ]
       Input = input
-      Output = Xml2Feliz.parse input
-      Output2 = HtmlNode.Parse input
+      Output = parse input
       DropdownIsActive = false
       ExpandedExamples = Set.singleton "Simple" },
     cmd
@@ -148,8 +151,7 @@ let update (msg: Msg) (model: Model) =
     | InputChanged content ->
         { model with
               Input = content
-              Output = Xml2Feliz.parse content
-              Output2 = HtmlNode.Parse content },
+              Output = parse content },
         Cmd.none
     | SelectExample (page, name) ->
         let content =
@@ -158,8 +160,7 @@ let update (msg: Msg) (model: Model) =
 
         { model with
               Input = content
-              Output = Xml2Feliz.parse content
-              Output2 = HtmlNode.Parse content
+              Output = parse content
               DropdownIsActive = false },
         Cmd.none
     | ToggleDropdown ->
@@ -181,8 +182,9 @@ let update (msg: Msg) (model: Model) =
             BulmaExampleParser.getExamples result.Content
             |> Array.choose
                 (fun (name, example) ->
-                    Xml2Feliz.tryParse example
-                    |> Option.map (fun _ -> name, example))
+                    match parse example with
+                    | Ok _ -> Some(name, example)
+                    | _ -> None)
 
         if Array.isEmpty examples then
             model, Cmd.none
@@ -315,25 +317,6 @@ let inputCol model dispatch =
         ]
     ]
 
-let outputXml2Feliz model dispatch =
-    Bulma.column [
-        column.is6
-        prop.children [
-            Bulma.box [
-                prop.id "output"
-                prop.children [
-                    Bulma.button.button [
-                        color.isPrimary
-                        prop.className Css.CopyButton
-                        prop.text "Copy"
-                        prop.onClick (fun _ -> Extensions.copyToClipboard "#output>pre")
-                    ]
-                    Html.pre (Xml2Feliz.format model.Output)
-                ]
-            ]
-        ]
-    ]
-
 let outputHtml2Feliz model dispatch =
     Bulma.column [
         column.is6
@@ -347,7 +330,13 @@ let outputHtml2Feliz model dispatch =
                         prop.text "Copy"
                         prop.onClick (fun _ -> Extensions.copyToClipboard "#output2>pre")
                     ]
-                    Html.pre (Html2Feliz.format model.Output2)
+                    match model.Output with
+                    | Ok htmlNodes -> Html.pre (Html2Feliz.format htmlNodes)
+                    | Error err ->
+                        Bulma.notification [
+                            color.isDanger
+                            prop.text err
+                        ]
                 ]
             ]
         ]
@@ -357,7 +346,6 @@ let content model dispatch =
     Bulma.columns [
         listOfExamplesCol model dispatch
         inputCol model dispatch
-        //outputXml2Feliz model dispatch
         outputHtml2Feliz model dispatch
     ]
 
