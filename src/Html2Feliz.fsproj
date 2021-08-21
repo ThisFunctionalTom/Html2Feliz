@@ -13,6 +13,7 @@
         <Compile Include="HtmlCharRefs.fs" />
         <Compile Include="HtmlParser.fs" />
         <Compile Include="BulmaExampleParser.fs" />
+        <Compile Include="PropertyTypes.fs" />
         <Compile Include="Html2Feliz.fs" />
         <Compile Include="App.fs" />
     </ItemGroup>

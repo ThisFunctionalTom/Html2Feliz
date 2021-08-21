@@ -76,15 +76,44 @@ let formatAttribute indent level (HtmlAttribute (name, value)) =
         let classes = value.Split(' ')
 
         match classes with
-        | [| single |] -> sprintf "%sprop.className \"%s\"" indentStr single
+        | [| single |] -> $"{indentStr}prop.className \"{single}\""
         | multi ->
             let classes =
                 multi
                 |> Array.map (sprintf "\"%s\"")
                 |> String.concat "; "
 
-            sprintf "%sprop.classes [ %s ]" indentStr classes
-    | _ -> sprintf $@"{indentStr}prop.{formatAttributeName name} ""{value}"""
+            $"{indentStr}prop.classes [ {classes} ]"
+    | _ ->
+        let name = formatAttributeName name
+
+        let inline fromTryParse f =
+            match f value with
+            | true, x -> Some(string x)
+            | _ -> None
+
+        let value =
+            PropertyTypes.propertyTypes
+            |> Map.tryFind name
+            |> Option.defaultValue List.empty
+            |> List.sortBy
+                (fun propType ->
+                    [ "bool"; "int"; "float" ]
+                    |> List.findIndex ((=) propType))
+            |> List.map
+                (fun types ->
+                    printfn $"{name}: {types}"
+                    types)
+            |> List.tryPick
+                (fun propType ->
+                    match propType with
+                    | "bool" -> fromTryParse Boolean.TryParse
+                    | "int" -> fromTryParse Int32.TryParse
+                    | "float" -> fromTryParse Double.TryParse
+                    | _ -> None)
+            |> Option.defaultValue $"\"{value}\""
+
+        sprintf $@"{indentStr}prop.{name} {value}"
 
 let containsOnlyCommentsOrEmptyText (elements: HtmlNode list) =
     elements
