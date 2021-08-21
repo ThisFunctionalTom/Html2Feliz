@@ -16,16 +16,18 @@ let toCamelCase (words: string []) =
 
     words |> Array.mapi convertWord
 
-let keywords = [ "type" ]
+let nameMaps =
+    [ "type", "type'"
+      "fieldset", "fieldSet" ]
+    |> Map.ofList
 
 let formatAttributeName (attr: string) =
     let name =
         attr.Split('-') |> toCamelCase |> String.concat ""
 
-    if keywords |> List.contains name then
-        $"{name}'"
-    else
-        name
+    nameMaps
+    |> Map.tryFind name
+    |> Option.defaultValue name
 
 let rec compressSpaces (text: string) =
     let compressed = text.Replace("  ", " ")
@@ -102,6 +104,12 @@ let (|EmptyChildren|SingleTextNode|Children|) (elements: HtmlNode list) =
     | [ HtmlText text ] -> SingleTextNode text
     | _ -> Children elements
 
+
+let formatNodeName (name: string) =
+    nameMaps
+    |> Map.tryFind name
+    |> Option.defaultValue name
+
 let rec formatNode indent level (pos: ChildPosition, node: HtmlNode) =
     let line level text =
         let indentStr = String(' ', indent * level)
@@ -119,10 +127,11 @@ let rec formatNode indent level (pos: ChildPosition, node: HtmlNode) =
         | HtmlText "" -> ()
         | HtmlComment _comment -> ()
         | HtmlText text -> line level $"Html.text \"{formatTextProp pos text}\""
-        | HtmlElement (name, [], children) when emptyChildren children -> line level ($"Html.{name} []")
-        | HtmlElement (name, [], SingleTextNode text) -> line level ($"Html.{name} \"{formatTextProp pos text}\"")
+        | HtmlElement (name, [], children) when emptyChildren children -> line level ($"Html.{formatNodeName name} []")
+        | HtmlElement (name, [], SingleTextNode text) ->
+            line level ($"Html.{formatNodeName name} \"{formatTextProp pos text}\"")
         | HtmlElement (name, attrs, EmptyChildren) ->
-            line level ($"Html.{name} [")
+            line level ($"Html.{formatNodeName name} [")
 
             for attr in attrs do
                 formatAttribute indent (level + 1) attr
@@ -131,14 +140,14 @@ let rec formatNode indent level (pos: ChildPosition, node: HtmlNode) =
         | HtmlElement (name, [], children) ->
             // when there are no attributes
             // no need for prop.children
-            line level $"Html.{name} ["
+            line level $"Html.{formatNodeName name} ["
 
             for child in toPositionedChildren children do
                 yield! formatNode indent (level + 1) child
 
             line level "]"
         | HtmlElement (name, attrs, children) ->
-            line level $"Html.{name} ["
+            line level $"Html.{formatNodeName name} ["
 
             for attr in attrs |> List.sort do
                 formatAttribute indent (level + 1) attr
