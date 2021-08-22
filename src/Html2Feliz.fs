@@ -83,7 +83,7 @@ let formatAttributeValue name value =
     |> List.tryPick
         (fun propType ->
             match propType with
-            | "bool" -> tryParse Boolean.TryParse value
+            | "bool" -> Some "true"
             | "int" -> tryParse Int32.TryParse value
             | "float" -> tryParse Double.TryParse value
             | _ -> None)

@@ -7,3 +7,7 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 fsharp_single_argument_web_mode = true
+
+[*.html]
+autoclose_html_tags = false
+html_indent_size = 2

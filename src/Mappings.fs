@@ -2,16 +2,7 @@ module Mappings
 
 let htmlNames =
     [
-        "a", "anchor"
         "fieldset", "fieldSet"
-        "li", "listItem"
-        "ol", "orderedList"
-        "p", "paragraph"
-        "tbody", "tableBody"
-        "td", "tableCell"
-        "th", "tableHeader"
-        "tr", "tableRow"
-        "ul", "unorderedList"
         "use", "use'"
     ]
     |> Map.ofList
@@ -19,20 +10,13 @@ let htmlNames =
 let propNames =
     [
         "begin", "begin'"
-        "className", "classes"
         "end", "end'"
         "for", "for'"
         "hreflang", "hrefLang"
-        "dangerouslySetInnerHTML", "innerHtml"
         "checked", "isChecked"
         "open", "isOpen"
-        "onChange", "onCheckedChange"
-        "onDoubleClick", "onDblClick"
-        "onChange", "onTextChange"
-        "selectionStart", "selectionEnd"
         "span", "spam"
         "srclang", "srcLang"
-        "children", "text"
         "to", "to'"
         "type", "type'"
     ]

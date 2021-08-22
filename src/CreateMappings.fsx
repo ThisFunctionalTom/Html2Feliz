@@ -25,7 +25,10 @@ let htmlNameDiffs =
             else
                 None)
     |> Array.distinct
-    |> Array.filter (fun (htmlName, felizName) -> htmlName <> felizName)
+    |> Array.groupBy fst
+    |> Array.map (fun (name, values) -> name, values |> Array.map snd)
+    |> Array.filter (fun (htmlName, felizNames) -> felizNames |> Array.contains htmlName |> not)
+    |> Array.map (fun (htmlName, [| felizName |]) -> htmlName, felizName)
 
 let propNameDiffs =
     let regex =
@@ -49,7 +52,11 @@ let propNameDiffs =
             else
                 None)
     |> Array.distinct
-    |> Array.filter (fun (attrName, propName) -> attrName <> propName)
+    |> Array.groupBy fst
+    |> Array.map (fun (attr, props) -> attr, props |> Array.map snd)
+    |> Array.filter (fun (attr, props) -> props |> Array.contains attr |> not)
+    |> Array.filter (fun (attr, [| prop |]) -> attr <> prop)
+    |> Array.map (fun (attr, [| prop |]) -> attr, prop)
 
 let propTypes =
     let regex =

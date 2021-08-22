@@ -51,6 +51,9 @@ let examples =
         TextFile<"examples/TextWithSignificantSpaces.html">
             .Text
 
+    let cornerCases =
+        TextFile<"examples/SomeCornerCases.html">.Text
+
     [| "simple header", simpleHeader
        "simple body", simpleBody
        "paragraph with class", paraWithClass
@@ -58,7 +61,8 @@ let examples =
        "self closing element", selfClosing
        "empty element", emptyElement
        "empty element with text", emptyWithText
-       "significant spaces", textWithSpace |]
+       "significant spaces", textWithSpace
+       "corner cases", cornerCases |]
 
 type Model =
     { Examples: Map<string, (string * string) array>
