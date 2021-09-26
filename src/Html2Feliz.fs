@@ -178,7 +178,7 @@ let rec formatNode indent level (pos: ChildPosition, node: HtmlNode) =
 
             match children with
             | EmptyChildren -> ()
-            | SingleTextNode text -> line (level + 1) $"prop.text \"{formatTextProp pos text}"
+            | SingleTextNode text -> line (level + 1) $"prop.text \"{formatTextProp pos text}\""
             | Children children ->
                 line (level + 1) "prop.children ["
 

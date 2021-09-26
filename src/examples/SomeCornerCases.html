@@ -3,13 +3,15 @@
     <fieldset></fieldset>
     <!-- some HTML can be written without closing tag like input -->
     <!-- some HTML attributes have different names in Feliz like type', isOpen ... -->
-    <input type="password">
+    <input type="password" />
     <!-- Boolean props should always be true if there is an attribute? -->
-    <input type="checkbox">
-    <input type="checkbox" checked>
-    <input type="checkbox" checked="">
-    <input type="checkbox" checked="true">
-    <input type="checkbox" checked="on">
+    <input type="checkbox" />
+    <input type="checkbox" checked />
+    <input type="checkbox" checked="" />
+    <input type="checkbox" checked="true" />
+    <input type="checkbox" checked="on" />
     <!-- some properties can have int, float or boolean values instead of strings -->
     <textarea class="form-control" rows="8" />
+    <!-- bug: missing closing quotes in text node -->
+    <p class="subtitle is-6">@johnsmith</p>
 </div>
