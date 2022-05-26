@@ -10,6 +10,8 @@ open Zanaptak.TypedCssClasses
 open Fable.SimpleHttp
 open FSharp.Data
 
+//Fable.Core.JsInterop.importSideEffects "bulma"
+
 type FA = CssClasses<"../node_modules/@fortawesome/fontawesome-free/css/all.min.css", Naming.PascalCase>
 type Css = CssClasses<"../src/styles/main.scss", Naming.PascalCase>
 
@@ -25,23 +27,17 @@ module textarea =
 importSideEffects "./styles/main.scss"
 
 let examples =
-    let simpleHeader =
-        TextFile<"examples/SimpleHeader.html">.Text
+    let simpleHeader = TextFile<"examples/SimpleHeader.html">.Text
 
-    let simpleBody =
-        TextFile<"examples/SimpleBody.html">.Text
+    let simpleBody = TextFile<"examples/SimpleBody.html">.Text
 
-    let paraWithClass =
-        TextFile<"examples/ParagraphWithStyle.html">.Text
+    let paraWithClass = TextFile<"examples/ParagraphWithStyle.html">.Text
 
-    let comments =
-        TextFile<"examples/CommentNode.html">.Text
+    let comments = TextFile<"examples/CommentNode.html">.Text
 
-    let selfClosing =
-        TextFile<"examples/SelfClosingElement.html">.Text
+    let selfClosing = TextFile<"examples/SelfClosingElement.html">.Text
 
-    let emptyElement =
-        TextFile<"examples/EmptyElement.html">.Text
+    let emptyElement = TextFile<"examples/EmptyElement.html">.Text
 
     let emptyWithText =
         TextFile<"examples/EmptyElementWithText.html">
@@ -51,8 +47,7 @@ let examples =
         TextFile<"examples/TextWithSignificantSpaces.html">
             .Text
 
-    let cornerCases =
-        TextFile<"examples/SomeCornerCases.html">.Text
+    let cornerCases = TextFile<"examples/SomeCornerCases.html">.Text
 
     [| "simple header", simpleHeader
        "simple body", simpleBody
@@ -154,8 +149,8 @@ let update (msg: Msg) (model: Model) =
     match msg with
     | InputChanged content ->
         { model with
-              Input = content
-              Output = parse content },
+            Input = content
+            Output = parse content },
         Cmd.none
     | SelectExample (page, name) ->
         let content =
@@ -163,14 +158,11 @@ let update (msg: Msg) (model: Model) =
             |> Array.pick (fun (n, c) -> if n = name then Some c else None)
 
         { model with
-              Input = content
-              Output = parse content
-              DropdownIsActive = false },
+            Input = content
+            Output = parse content
+            DropdownIsActive = false },
         Cmd.none
-    | ToggleDropdown ->
-        { model with
-              DropdownIsActive = not model.DropdownIsActive },
-        Cmd.none
+    | ToggleDropdown -> { model with DropdownIsActive = not model.DropdownIsActive }, Cmd.none
     | ToggleExampleExpanded page ->
         let expanded =
             if model.ExpandedExamples.Contains page then
@@ -178,24 +170,19 @@ let update (msg: Msg) (model: Model) =
             else
                 Set.add page model.ExpandedExamples
 
-        { model with
-              ExpandedExamples = expanded },
-        Cmd.none
+        { model with ExpandedExamples = expanded }, Cmd.none
     | BulmaExampleLoaded result ->
         let examples =
             BulmaExampleParser.getExamples result.Content
-            |> Array.choose
-                (fun (name, example) ->
-                    match parse example with
-                    | Ok _ -> Some(name, example)
-                    | _ -> None)
+            |> Array.choose (fun (name, example) ->
+                match parse example with
+                | Ok _ -> Some(name, example)
+                | _ -> None)
 
         if Array.isEmpty examples then
             model, Cmd.none
         else
-            { model with
-                  Examples = Map.add result.Page examples model.Examples },
-            Cmd.none
+            { model with Examples = Map.add result.Page examples model.Examples }, Cmd.none
 
 module Extensions =
     open Browser.Dom

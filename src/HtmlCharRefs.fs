@@ -2255,7 +2255,7 @@ module internal HtmlCharRefs =
                     else
                         s.Substring(3, s.Length - 3)
 
-                match UInt32.TryParse(num, NumberStyles.Integer, CultureInfo.InvariantCulture) with
+                match UInt32.TryParse(num) with
                 | true, i -> Number(i)
                 | false, _ -> Lookup(orig)
             | ("&x", _) ->
@@ -2272,8 +2272,7 @@ module internal HtmlCharRefs =
         match ref with
         | Number (num) ->
             if num > 65535u then
-                let lead, tail =
-                    UnicodeHelper.getUnicodeSurrogatePair num
+                let lead, tail = UnicodeHelper.getUnicodeSurrogatePair num
 
                 string lead + string tail
             else

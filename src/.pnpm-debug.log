@@ -1,0 +1,23 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 info pnpm": {
+    "err": {
+      "name": "Error",
+      "message": "not found: femto",
+      "code": "ENOENT",
+      "stack": "Error: not found: femto\n    at getNotFoundError (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:41687:51)\n    at Function.whichSync [as sync] (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:41764:13)\n    at getCommandAbsolutePathSync (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:43329:44)\n    at default_1 (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:43338:32)\n    at C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:172189:39"
+    }
+  },
+  "2 error pnpm": {
+    "code": "ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL",
+    "prefix": "C:\\Users\\tomas\\source\\Html2Feliz",
+    "err": {
+      "name": "pnpm",
+      "message": "not found: femto",
+      "code": "ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL",
+      "stack": "Error: not found: femto\n    at getNotFoundError (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:41687:51)\n    at Function.whichSync [as sync] (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:41764:13)\n    at getCommandAbsolutePathSync (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:43329:44)\n    at default_1 (C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:43338:32)\n    at C:\\Users\\tomas\\AppData\\Roaming\\npm\\node_modules\\pnpm\\dist\\pnpm.cjs:172189:39"
+    }
+  }
+}

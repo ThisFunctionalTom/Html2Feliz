@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
-        <LangVersion>preview</LangVersion>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,14 +17,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Update="FSharp.Core" Version="5.0" />
-        <PackageReference Include="Fable.Core" Version="3.1.6" />
+        <PackageReference Update="FSharp.Core" Version="6.0.4" />
         <PackageReference Include="Fable.Elmish.React" Version="3.0.1" />
-        <PackageReference Include="Fable.SimpleHttp" Version="3.0.0" />
-        <PackageReference Include="Feliz" Version="1.16.0" />
-        <PackageReference Include="Feliz.Bulma" Version="2.4.0" />
-        <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.3.5" />
-        <PackageReference Include="Zanaptak.TypedCssClasses" Version="0.4.0" />
+        <PackageReference Include="Fable.SimpleHttp" Version="3.1.0" />
+        <PackageReference Include="Feliz" Version="1.64.0" />
+        <PackageReference Include="Feliz.Bulma" Version="2.18.0" />
+        <PackageReference Include="FSharp.Data.LiteralProviders" Version="0.4.14" />
+        <PackageReference Include="Zanaptak.TypedCssClasses" Version="1.0.0" />
     </ItemGroup>
 
 </Project>
