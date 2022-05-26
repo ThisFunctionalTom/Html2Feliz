@@ -10,8 +10,6 @@ open Zanaptak.TypedCssClasses
 open Fable.SimpleHttp
 open FSharp.Data
 
-//Fable.Core.JsInterop.importSideEffects "bulma"
-
 type FA = CssClasses<"../node_modules/@fortawesome/fontawesome-free/css/all.min.css", Naming.PascalCase>
 type Css = CssClasses<"../src/styles/main.scss", Naming.PascalCase>
 

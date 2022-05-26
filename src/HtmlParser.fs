@@ -6,8 +6,6 @@ open System.ComponentModel
 open System.Text
 open System.Text.RegularExpressions
 open FSharp.Data
-open System.Runtime.InteropServices
-open System.Collections.Generic
 
 // --------------------------------------------------------------------------------------
 
