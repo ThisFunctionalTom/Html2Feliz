@@ -4,17 +4,20 @@
     "version": "0.0.0",
     "scripts": {
         "dev": "dotnet fable watch src --run vite dev",
-        "build": "dotnet fable src --run pnpx vite build",
-        "preview": "dotnet fable src --run pnpx vite preview"
+        "build": "dotnet fable src --run vite build",
+        "preview": "vite preview",
+        "predeploy": "pnpm run build",
+        "deploy": "gh-pages -d deploy"
     },
     "devDependencies": {
-        "vite": "^2.9.9"
+        "vite": "^2.9.9",
+        "gh-pages": "^4.0.0",
+        "sass": "^1.52.1"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^6.1.1",
         "bulma": "0.9.4",
         "react": "17.0.2",
-        "react-dom": "17.0.2",
-        "sass": "^1.52.1"
+        "react-dom": "17.0.2"
     }
 }
