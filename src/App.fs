@@ -249,7 +249,7 @@ let navbar =
     let brand =
         Bulma.navbarBrand.div [
             Html.div [
-                Bulma.title.h3 "Xml2Feliz"
+                Bulma.title.h3 "Html2Feliz"
                 Bulma.subtitle.p "Convert HTML into Feliz style code to learn the syntax"
             ]
         ]

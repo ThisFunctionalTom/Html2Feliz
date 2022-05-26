@@ -5,9 +5,8 @@
     "scripts": {
         "dev": "dotnet fable watch src --run vite dev",
         "build": "dotnet fable src --run vite build",
-        "preview": "vite preview",
-        "predeploy": "pnpm run build",
-        "deploy": "gh-pages -d deploy"
+        "preview": "dotnet fable src --run vite build && vite preview",
+        "deploy": "dotnet fable src --run vite build --base=/Html2Feliz/ && gh-pages --dist dist"
     },
     "devDependencies": {
         "vite": "^2.9.9",
